@@ -1,0 +1,1245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Documentation wiki for the rhinotools Python scripts for Rhino3d: finger joints, mortise and tenon, dogbone relief cuts, lay flat.">
+<title>Rhino Tools Wiki</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: fixed top bar, sticky left tree, one reading column (~72ch). Shop-drawing palette: cool paper, machinist blue for links, cutter orange for the cutter, plywood tans in the drawings. */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --fg:#1C2229; --muted:#5B6672; --line:#D8DEE4; --line-soft:#E9EDF1;
+  --accent:#1F5FA8; --accent-soft:#E4EDF8; --cut:#D9631E; --bad:#C0392B;
+  --ok:#2E7D4F; --ok-soft:#E3F2E9; --warn:#9A6400; --warn-soft:#FBF1D9; --neutral-soft:#ECEFF2;
+  --ply:#E6C892; --ply-2:#D1AE73; --ply-3:#B8924F;
+  --oak:#B07A4A; --oak-2:#98643A; --oak-3:#7E512D;
+  --maple:#F1DDB4; --maple-2:#DCC18C; --maple-3:#C4A56A;
+  --ink-line:#4A3B25; --code-bg:#EEF1F4;
+  --font-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-display:'IBM Plex Sans Condensed','Arial Narrow',system-ui,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --topbar:56px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#13171C; --surface:#1B2128; --fg:#E3E8ED; --muted:#99A5B1; --line:#2E3741; --line-soft:#252D36;
+  --accent:#82B3F3; --accent-soft:#1E2B3D; --cut:#F08A4F; --bad:#F07A6E;
+  --ok:#6CC592; --ok-soft:#1C3327; --warn:#E3B04B; --warn-soft:#3A2F14; --neutral-soft:#262E37;
+  --ply:#C9A86E; --ply-2:#AE8E58; --ply-3:#8D7042;
+  --oak:#9A6A40; --oak-2:#7F562F; --oak-3:#654322;
+  --maple:#DCC79A; --maple-2:#C3AB77; --maple-3:#A58D5D;
+  --ink-line:#2A2118; --code-bg:#222A33; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#13171C; --surface:#1B2128; --fg:#E3E8ED; --muted:#99A5B1; --line:#2E3741; --line-soft:#252D36;
+  --accent:#82B3F3; --accent-soft:#1E2B3D; --cut:#F08A4F; --bad:#F07A6E;
+  --ok:#6CC592; --ok-soft:#1C3327; --warn:#E3B04B; --warn-soft:#3A2F14; --neutral-soft:#262E37;
+  --ply:#C9A86E; --ply-2:#AE8E58; --ply-3:#8D7042;
+  --oak:#9A6A40; --oak-2:#7F562F; --oak-3:#654322;
+  --maple:#DCC79A; --maple-2:#C3AB77; --maple-3:#A58D5D;
+  --ink-line:#2A2118; --code-bg:#222A33; color-scheme:dark }
+
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 var(--font-body);-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:2.1rem;letter-spacing:-.01em}
+h2{font-size:1.35rem;margin-top:2.2rem;margin-bottom:.6rem;padding-top:.6rem;border-top:1px solid var(--line-soft)}
+h3{font-size:1.05rem;margin-top:1.4rem;margin-bottom:.4rem;font-family:var(--font-body);font-weight:600}
+p{margin:.6rem 0}
+code,kbd,.mono{font-family:var(--font-mono);font-size:.9em}
+code{background:var(--code-bg);padding:.1em .35em;border-radius:3px}
+pre{background:var(--code-bg);border:1px solid var(--line-soft);border-radius:6px;padding:12px 14px;overflow-x:auto;font-size:.86rem;line-height:1.5;margin:.7rem 0}
+pre code{background:none;padding:0;font-size:inherit}
+kbd{background:var(--surface);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 .4em;font-size:.82em}
+ul,ol{padding-left:1.4rem;margin:.5rem 0}
+li{margin:.25rem 0}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:.7rem 0}
+th,td{text-align:left;vertical-align:top;padding:.5rem .6rem;border-bottom:1px solid var(--line-soft)}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.tablewrap{overflow-x:auto}
+.tablewrap table{min-width:520px}
+td.k{font-family:var(--font-mono);font-size:.84rem;white-space:nowrap}
+
+/* top bar */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;height:var(--topbar);background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:600;font-size:1.12rem;color:var(--fg);white-space:nowrap}
+.brand svg{width:26px;height:26px;color:var(--accent)}
+.brand:hover{text-decoration:none}
+.brand .sub{font-family:var(--font-body);font-weight:400;font-size:.8rem;color:var(--muted);display:none}
+@media (min-width:700px){.brand .sub{display:inline}}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 10px;height:34px;flex:0 1 300px;min-width:0}
+.search svg{width:16px;height:16px;color:var(--muted);flex:none}
+.search input{border:0;background:transparent;color:var(--fg);font:inherit;font-size:.9rem;width:100%;min-width:0;outline:none}
+.menubtn{display:none;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;height:34px;padding:0 10px;font:inherit;font-size:.85rem;cursor:pointer}
+
+/* shell */
+.shell{display:grid;grid-template-columns:268px minmax(0,1fr);max-width:1240px;margin:0 auto}
+.sidenav{position:sticky;top:calc(var(--topbar) + env(safe-area-inset-top,0px));height:calc(100vh - var(--topbar) - env(safe-area-inset-top,0px));overflow-y:auto;border-right:1px solid var(--line);padding:18px 14px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));background:var(--bg);font-size:.9rem}
+.sidenav h4{margin:16px 0 4px;font:600 .72rem/1.3 var(--font-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding-left:10px}
+.sidenav h4:first-child{margin-top:0}
+.sidenav ul{list-style:none;padding:0;margin:0}
+.sidenav li{margin:0}
+.sidenav a{display:flex;align-items:center;gap:8px;color:var(--fg);padding:5px 10px;border-radius:5px;line-height:1.3}
+.sidenav a svg{width:18px;height:18px;color:var(--muted);flex:none}
+.sidenav a:hover{background:var(--surface);text-decoration:none}
+.sidenav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:500}
+.sidenav a[aria-current="page"] svg{color:var(--accent)}
+.sidenav .al{margin-left:auto;font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
+.sidenav li.hide{display:none}
+.sidenav .nomatch{display:none;color:var(--muted);padding:8px 10px;font-size:.85rem}
+.sidenav.filtering .nomatch.show{display:block}
+main{padding-block:26px 72px;padding-left:max(28px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));min-width:0}
+.page{display:none;max-width:76ch}
+.page.current{display:block}
+.crumbs{font-size:.8rem;color:var(--muted);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px}
+.crumbs a{color:var(--muted)}
+.crumbs span::before{content:"/";margin-right:6px;color:var(--line)}
+.crumbs span:first-child::before{content:none}
+
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .menubtn{display:inline-block}
+  .sidenav{display:none;position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .sidenav.open{display:block}
+  main{padding-left:max(16px,env(safe-area-inset-left,0px))}
+  .search{flex-basis:160px}
+}
+
+/* page head */
+.page-head{display:grid;grid-template-columns:60px minmax(0,1fr);gap:18px;align-items:start;margin-bottom:10px}
+.page-head .ico{width:60px;height:60px;border:1px solid var(--line);border-radius:8px;background:var(--surface);display:grid;place-items:center;color:var(--accent)}
+.page-head .ico svg{width:38px;height:38px}
+.page-head .lede{color:var(--muted);font-size:1.02rem;margin:.3rem 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:.6rem 0 0;align-items:center}
+.chip{font-family:var(--font-mono);font-size:.78rem;background:var(--code-bg);border:1px solid var(--line-soft);border-radius:4px;padding:2px 8px;color:var(--fg)}
+.chip b{font-weight:500;color:var(--muted)}
+.badge{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;font-weight:600;border-radius:4px;padding:3px 7px}
+.badge.stable{background:var(--ok-soft);color:var(--ok)}
+.badge.exp{background:var(--warn-soft);color:var(--warn)}
+.badge.internal{background:var(--neutral-soft);color:var(--muted)}
+.badge.concept{background:var(--accent-soft);color:var(--accent)}
+
+/* callouts */
+.eli5{border-left:4px solid var(--cut);background:var(--surface);padding:12px 18px 14px;border-radius:0 8px 8px 0;margin:1.2rem 0}
+.eli5 .tag{display:block;font:600 .7rem/1 var(--font-body);text-transform:uppercase;letter-spacing:.09em;color:var(--cut);margin-bottom:6px}
+.eli5 p{margin:.3rem 0}
+.callout{border-left:4px solid var(--accent);background:var(--surface);padding:10px 16px;border-radius:0 8px 8px 0;margin:1rem 0;font-size:.95rem}
+.callout.warn{border-color:var(--warn)}
+.callout.bad{border-color:var(--bad)}
+.callout .tag{display:block;font:600 .7rem/1 var(--font-body);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:4px}
+
+/* animation panel */
+.anim{border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:1rem 0;overflow:hidden}
+.anim svg{display:block;width:100%;height:auto;max-width:100%}
+.anim-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--line-soft);font-size:.82rem;color:var(--muted)}
+.anim-bar .title{font-weight:500;color:var(--fg)}
+.anim-bar button{margin-left:auto;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:5px;font:inherit;font-size:.8rem;padding:4px 10px;cursor:pointer}
+.anim-bar button + button{margin-left:0}
+.anim-bar button:hover{background:var(--accent-soft)}
+
+/* svg scene styles */
+.scene{font-family:var(--font-body)}
+.scene polygon,.scene rect,.scene circle,.scene path,.scene line{stroke:var(--ink-line);stroke-width:.8;stroke-linejoin:round}
+.scene text{stroke:none}
+.scene .ply .top{fill:var(--ply)} .scene .ply .front{fill:var(--ply-2)} .scene .ply .side{fill:var(--ply-3)}
+.scene .oak .top{fill:var(--oak)} .scene .oak .front{fill:var(--oak-2)} .scene .oak .side{fill:var(--oak-3)}
+.scene .maple .top{fill:var(--maple)} .scene .maple .front{fill:var(--maple-2)} .scene .maple .side{fill:var(--maple-3)}
+.scene .void{fill:var(--surface)!important}
+.scene .ghost{fill:var(--accent);fill-opacity:.14;stroke:var(--accent);stroke-dasharray:3 2;stroke-width:1}
+.scene .slice{stroke:var(--accent);stroke-width:1.4}
+.scene .edge{stroke:var(--accent);stroke-width:2.2;stroke-linecap:round}
+.scene .click{fill:var(--accent);stroke:none}
+.scene .click-ring{fill:none;stroke:var(--accent);stroke-width:1.5}
+.scene .cap{font-size:11.5px;fill:var(--muted);text-anchor:middle}
+.scene .lbl{font-size:11px;fill:var(--fg);text-anchor:end}
+.scene .lbl.start{text-anchor:start} .scene .lbl.mid{text-anchor:middle} .scene .dimmed{fill:var(--muted)}
+.scene .tiny{font-size:8px;fill:var(--fg)}
+.scene .grid{stroke:var(--line);stroke-width:.7}
+.scene .hl{fill:var(--accent);fill-opacity:.32;stroke:var(--accent)}
+.scene .curve{fill:none;stroke:var(--accent);stroke-width:1.4}
+.scene .measure{stroke:var(--accent);stroke-dasharray:3 2}
+.scene .sheet{fill:var(--ply);fill-opacity:.25;stroke:var(--ink-line)}
+.scene .arrow{stroke:var(--cut);stroke-width:1.6} .scene .arrhead{fill:var(--cut);stroke:none} .scene .pt{fill:var(--cut);stroke:none}
+.scene .prompt-box{fill:var(--surface);stroke:var(--line)}
+.scene .prompt-txt{font-family:var(--font-mono);font-size:10px;fill:var(--fg)}
+.scene .redpt{fill:var(--bad);stroke:none} .scene .refpt{fill:var(--accent);stroke:none}
+.scene .cut{fill:var(--cut);fill-opacity:.45;stroke:var(--cut);stroke-width:.8}
+.scene .ply2d{fill:var(--ply)} .scene .oak2d{fill:var(--oak)} .scene .faint{fill-opacity:.35}
+.scene .ideal{fill:none;stroke:var(--accent);stroke-dasharray:4 3;stroke-width:1.2}
+.scene .cutter{fill:var(--cut);fill-opacity:.5;stroke:var(--cut)} .scene .cross{stroke:var(--cut);stroke-width:.8}
+.scene .bad{fill:var(--bad);fill-opacity:.6;stroke:none} .scene .bad-txt{fill:var(--bad)}
+.scene .diag{stroke:var(--accent);stroke-dasharray:2 2;stroke-width:1}
+.scene .tab{fill:var(--oak);fill-opacity:.92;stroke:var(--ink-line)}
+.scene .poly{fill:none;stroke:var(--accent);stroke-width:1.6}
+.a,.scene [data-a]{animation-duration:var(--dur,13s);animation-timing-function:linear;animation-iteration-count:infinite;animation-fill-mode:both}
+.tilt{transform-box:fill-box;transform-origin:50% 50%}
+.anim.paused .a,.anim.paused [data-a]{animation-play-state:paused}
+@media (prefers-reduced-motion: reduce){.scene .a,.scene [data-a]{animation:none!important}}
+
+/* steps, prompts, see also */
+.steps{counter-reset:s;list-style:none;padding:0;margin:.6rem 0}
+.steps li{counter-increment:s;position:relative;padding-left:40px;margin:.55rem 0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:.05em;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font:600 .8rem/26px var(--font-mono);text-align:center}
+.steps .prompt{font-family:var(--font-mono);font-size:.82rem;color:var(--muted)}
+.seealso{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:.6rem 0}
+.card{display:block;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:12px 14px;color:var(--fg)}
+.card:hover{border-color:var(--accent);text-decoration:none}
+.card .t{display:flex;align-items:center;gap:8px;font-weight:600;font-family:var(--font-display);font-size:1.02rem}
+.card .t svg{width:20px;height:20px;color:var(--accent);flex:none}
+.card .d{font-size:.85rem;color:var(--muted);margin-top:4px}
+.card .al{font-family:var(--font-mono);font-size:.72rem;color:var(--muted);margin-left:auto}
+.cmd{font-family:var(--font-mono);font-size:.88em;background:var(--code-bg);padding:.05em .35em;border-radius:3px;color:var(--accent);border-bottom:1px solid var(--accent)}
+.term{color:inherit;border-bottom:1px dotted var(--muted);cursor:help}
+.term:hover{text-decoration:none;border-bottom-style:solid}
+.src{font-size:.85rem;color:var(--muted)}
+.fixme{font-family:var(--font-mono);font-size:.72rem;color:var(--bad);border:1px solid var(--bad);border-radius:3px;padding:0 4px;vertical-align:middle}
+
+/* home */
+.hero{padding:6px 0 10px}
+.hero h1{font-size:2.6rem}
+.hero p.lede{font-size:1.1rem;color:var(--muted);max-width:60ch}
+.hero .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:7px 14px;background:var(--surface);color:var(--fg);font-weight:500;font-size:.9rem}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:hover{text-decoration:none;border-color:var(--accent)}
+.family{margin-top:1.6rem}
+.family h2{border:0;padding:0;margin:0 0 .5rem;display:flex;align-items:baseline;gap:10px}
+.family h2 small{font:400 .85rem var(--font-body);color:var(--muted)}
+.flow{list-style:none;padding:0;margin:1rem 0;display:grid;gap:0}
+.flow li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;padding:10px 0 14px;position:relative}
+.flow li::before{content:"";position:absolute;left:16px;top:38px;bottom:-4px;width:2px;background:var(--line)}
+.flow li:last-child::before{display:none}
+.flow .n{width:34px;height:34px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);color:var(--accent);display:grid;place-items:center;font:600 .9rem var(--font-mono)}
+.flow .n.opt{border-style:dashed;color:var(--muted);border-color:var(--muted)}
+.flow h3{margin:4px 0 2px}
+.flow p{margin:.2rem 0;color:var(--muted);font-size:.93rem}
+dl.gloss dt{font-weight:600;margin-top:.9rem;font-family:var(--font-display);font-size:1.05rem}
+dl.gloss dd{margin:.15rem 0 0}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.yt{display:inline-flex;align-items:center;gap:6px}
+footer.foot{max-width:76ch;margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line-soft);font-size:.82rem;color:var(--muted)}
+@keyframes v12-80{0%,11.5%{opacity:0} 13.5%{opacity:1} 79.5%{opacity:1} 81%,100%{opacity:0}}
+@keyframes v48-80{0%,47.5%{opacity:0} 49.5%{opacity:1} 79.5%{opacity:1} 81%,100%{opacity:0}}
+@keyframes v65-80{0%,64.5%{opacity:0} 66.5%{opacity:1} 79.5%{opacity:1} 81%,100%{opacity:0}}
+@keyframes r30{0%,29.5%{opacity:0;transform:scale(.2)} 30%{opacity:.9;transform:scale(.3)} 35%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v30-80{0%,29.5%{opacity:0} 31.5%{opacity:1} 79.5%{opacity:1} 81%,100%{opacity:0}}
+@keyframes r36{0%,35.5%{opacity:0;transform:scale(.2)} 36%{opacity:.9;transform:scale(.3)} 41%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v36-80{0%,35.5%{opacity:0} 37.5%{opacity:1} 79.5%{opacity:1} 81%,100%{opacity:0}}
+@keyframes w37-45-64-80{0%,36.5%{stroke-dashoffset:66;opacity:0} 37%{opacity:1;stroke-dashoffset:66} 45%{stroke-dashoffset:0;opacity:1} 79.5%{opacity:1;stroke-dashoffset:0} 81%,100%{opacity:0;stroke-dashoffset:0}}
+@keyframes v0-80{0%{opacity:1} 79.5%{opacity:1} 81%,100%{opacity:0}}
+@keyframes lift70{0%,82%{transform:translateY(0)} 92%,100%{transform:translateY(-78px)}}
+@keyframes v80-100{0%,79.5%{opacity:0} 81.5%{opacity:1} 100%{opacity:1}}
+@keyframes v0-12{0%{opacity:1} 11.5%{opacity:1} 13%,100%{opacity:0}}
+@keyframes v12-30{0%,11.5%{opacity:0} 13.5%{opacity:1} 29.5%{opacity:1} 31%,100%{opacity:0}}
+@keyframes v30-48{0%,29.5%{opacity:0} 31.5%{opacity:1} 47.5%{opacity:1} 49%,100%{opacity:0}}
+@keyframes v48-65{0%,47.5%{opacity:0} 49.5%{opacity:1} 64.5%{opacity:1} 66%,100%{opacity:0}}
+@keyframes d50-70{0%{opacity:1} 49.5%{opacity:1} 51.5%,69.5%{opacity:0.12} 71.5%{opacity:1} 100%{opacity:1}}
+@keyframes d30-50{0%{opacity:1} 29.5%{opacity:1} 31.5%,49.5%{opacity:0.12} 51.5%{opacity:1} 100%{opacity:1}}
+@keyframes d10-30{0%{opacity:1} 9.5%{opacity:1} 11.5%,29.5%{opacity:0.12} 31.5%{opacity:1} 100%{opacity:1}}
+@keyframes v0-70{0%{opacity:1} 69.5%{opacity:1} 71%,100%{opacity:0}}
+@keyframes r12{0%,11.5%{opacity:0;transform:scale(.2)} 12%{opacity:.9;transform:scale(.3)} 17%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes r17{0%,16.5%{opacity:0;transform:scale(.2)} 17%{opacity:.9;transform:scale(.3)} 22%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v17-30{0%,16.5%{opacity:0} 18.5%{opacity:1} 29.5%{opacity:1} 31%,100%{opacity:0}}
+@keyframes w18-25-100-30{0%,17.5%{stroke-dashoffset:102;opacity:0} 18%{opacity:1;stroke-dashoffset:102} 25%{stroke-dashoffset:0;opacity:1} 29.5%{opacity:1;stroke-dashoffset:0} 31%,100%{opacity:0;stroke-dashoffset:0}}
+@keyframes r32{0%,31.5%{opacity:0;transform:scale(.2)} 32%{opacity:.9;transform:scale(.3)} 37%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v32-50{0%,31.5%{opacity:0} 33.5%{opacity:1} 49.5%{opacity:1} 51%,100%{opacity:0}}
+@keyframes r37{0%,36.5%{opacity:0;transform:scale(.2)} 37%{opacity:.9;transform:scale(.3)} 42%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v37-50{0%,36.5%{opacity:0} 38.5%{opacity:1} 49.5%{opacity:1} 51%,100%{opacity:0}}
+@keyframes w38-45-64-50{0%,37.5%{stroke-dashoffset:66;opacity:0} 38%{opacity:1;stroke-dashoffset:66} 45%{stroke-dashoffset:0;opacity:1} 49.5%{opacity:1;stroke-dashoffset:0} 51%,100%{opacity:0;stroke-dashoffset:0}}
+@keyframes r52{0%,51.5%{opacity:0;transform:scale(.2)} 52%{opacity:.9;transform:scale(.3)} 57%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v52-70{0%,51.5%{opacity:0} 53.5%{opacity:1} 69.5%{opacity:1} 71%,100%{opacity:0}}
+@keyframes r57{0%,56.5%{opacity:0;transform:scale(.2)} 57%{opacity:.9;transform:scale(.3)} 62%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v57-70{0%,56.5%{opacity:0} 58.5%{opacity:1} 69.5%{opacity:1} 71%,100%{opacity:0}}
+@keyframes w58-65-160-70{0%,57.5%{stroke-dashoffset:162;opacity:0} 58%{opacity:1;stroke-dashoffset:162} 65%{stroke-dashoffset:0;opacity:1} 69.5%{opacity:1;stroke-dashoffset:0} 71%,100%{opacity:0;stroke-dashoffset:0}}
+@keyframes v72-100{0%,71.5%{opacity:0} 73.5%{opacity:1} 100%{opacity:1}}
+@keyframes v0-10{0%{opacity:1} 9.5%{opacity:1} 11%,100%{opacity:0}}
+@keyframes v10-30{0%,9.5%{opacity:0} 11.5%{opacity:1} 29.5%{opacity:1} 31%,100%{opacity:0}}
+@keyframes v30-50{0%,29.5%{opacity:0} 31.5%{opacity:1} 49.5%{opacity:1} 51%,100%{opacity:0}}
+@keyframes v50-70{0%,49.5%{opacity:0} 51.5%{opacity:1} 69.5%{opacity:1} 71%,100%{opacity:0}}
+@keyframes v70-100{0%,69.5%{opacity:0} 71.5%{opacity:1} 100%{opacity:1}}
+@keyframes v0-100{0%{opacity:1} 100%{opacity:1}}
+@keyframes laydown{0%,36%{transform:rotate(-32deg) translate(-30px,-105px)} 60%,100%{transform:translate(0,0) rotate(0)}}
+@keyframes ghost{0%,36%{opacity:1} 60%,100%{opacity:.35}}
+@keyframes r22{0%,21.5%{opacity:0;transform:scale(.2)} 22%{opacity:.9;transform:scale(.3)} 27%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v22-36{0%,21.5%{opacity:0} 23.5%{opacity:1} 35.5%{opacity:1} 37%,100%{opacity:0}}
+@keyframes v0-22{0%{opacity:1} 21.5%{opacity:1} 23%,100%{opacity:0}}
+@keyframes v22-38{0%,21.5%{opacity:0} 23.5%{opacity:1} 37.5%{opacity:1} 39%,100%{opacity:0}}
+@keyframes v38-62{0%,37.5%{opacity:0} 39.5%{opacity:1} 61.5%{opacity:1} 63%,100%{opacity:0}}
+@keyframes v62-100{0%,61.5%{opacity:0} 63.5%{opacity:1} 100%{opacity:1}}
+@keyframes v50-100{0%,49.5%{opacity:0} 51.5%{opacity:1} 100%{opacity:1}}
+@keyframes negj{0%,9%{opacity:1} 11%,35%{opacity:.15} 37%,69%{opacity:1} 71%,100%{opacity:0}}
+@keyframes v10-22{0%,9.5%{opacity:0} 11.5%{opacity:1} 21.5%{opacity:1} 23%,100%{opacity:0}}
+@keyframes v12-22{0%,11.5%{opacity:0} 13.5%{opacity:1} 21.5%{opacity:1} 23%,100%{opacity:0}}
+@keyframes v22-50{0%,21.5%{opacity:0} 23.5%{opacity:1} 49.5%{opacity:1} 51%,100%{opacity:0}}
+@keyframes v38-70{0%,37.5%{opacity:0} 39.5%{opacity:1} 69.5%{opacity:1} 71%,100%{opacity:0}}
+@keyframes r38{0%,37.5%{opacity:0;transform:scale(.2)} 38%{opacity:.9;transform:scale(.3)} 43%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes lift50{0%,72%{transform:translateY(0)} 84%,100%{transform:translateY(-52px)}}
+@keyframes v38-50{0%,37.5%{opacity:0} 39.5%{opacity:1} 49.5%{opacity:1} 51%,100%{opacity:0}}
+@keyframes v0-55{0%{opacity:1} 54.5%{opacity:1} 56%,100%{opacity:0}}
+@keyframes v30-55{0%,29.5%{opacity:0} 31.5%{opacity:1} 54.5%{opacity:1} 56%,100%{opacity:0}}
+@keyframes v55-100{0%,54.5%{opacity:0} 56.5%{opacity:1} 100%{opacity:1}}
+@keyframes v0-30{0%{opacity:1} 29.5%{opacity:1} 31%,100%{opacity:0}}
+@keyframes v12-24{0%,11.5%{opacity:0} 13.5%{opacity:1} 23.5%{opacity:1} 25%,100%{opacity:0}}
+@keyframes r14{0%,13.5%{opacity:0;transform:scale(.2)} 14%{opacity:.9;transform:scale(.3)} 19%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v14-24{0%,13.5%{opacity:0} 15.5%{opacity:1} 23.5%{opacity:1} 25%,100%{opacity:0}}
+@keyframes v24-36{0%,23.5%{opacity:0} 25.5%{opacity:1} 35.5%{opacity:1} 37%,100%{opacity:0}}
+@keyframes r41{0%,40.5%{opacity:0;transform:scale(.2)} 41%{opacity:.9;transform:scale(.3)} 46%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v41-70{0%,40.5%{opacity:0} 42.5%{opacity:1} 69.5%{opacity:1} 71%,100%{opacity:0}}
+@keyframes r44{0%,43.5%{opacity:0;transform:scale(.2)} 44%{opacity:.9;transform:scale(.3)} 49%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v44-70{0%,43.5%{opacity:0} 45.5%{opacity:1} 69.5%{opacity:1} 71%,100%{opacity:0}}
+@keyframes r47{0%,46.5%{opacity:0;transform:scale(.2)} 47%{opacity:.9;transform:scale(.3)} 52%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v47-70{0%,46.5%{opacity:0} 48.5%{opacity:1} 69.5%{opacity:1} 71%,100%{opacity:0}}
+@keyframes v36-52{0%,35.5%{opacity:0} 37.5%{opacity:1} 51.5%{opacity:1} 53%,100%{opacity:0}}
+@keyframes travel{0%,2%{transform:translate(136px,98px)} 12%{transform:translate(304px,98px)} 22%{transform:translate(304px,146px)} 32%{transform:translate(136px,146px)} 40%,100%{transform:translate(136px,98px)}}
+@keyframes cutvis{0%,38%{opacity:1} 42%,100%{opacity:0}}
+@keyframes v0-40{0%{opacity:1} 39.5%{opacity:1} 41%,100%{opacity:0}}
+@keyframes v40-60{0%,39.5%{opacity:0} 41.5%{opacity:1} 59.5%{opacity:1} 61%,100%{opacity:0}}
+@keyframes v60-100{0%,59.5%{opacity:0} 61.5%{opacity:1} 100%{opacity:1}}
+@keyframes v60-78{0%,59.5%{opacity:0} 61.5%{opacity:1} 77.5%{opacity:1} 79%,100%{opacity:0}}
+@keyframes v78-100{0%,77.5%{opacity:0} 79.5%{opacity:1} 100%{opacity:1}}
+@keyframes v22-46{0%,21.5%{opacity:0} 23.5%{opacity:1} 45.5%{opacity:1} 47%,100%{opacity:0}}
+@keyframes r28{0%,27.5%{opacity:0;transform:scale(.2)} 28%{opacity:.9;transform:scale(.3)} 33%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v28-46{0%,27.5%{opacity:0} 29.5%{opacity:1} 45.5%{opacity:1} 47%,100%{opacity:0}}
+@keyframes r34{0%,33.5%{opacity:0;transform:scale(.2)} 34%{opacity:.9;transform:scale(.3)} 39%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v34-46{0%,33.5%{opacity:0} 35.5%{opacity:1} 45.5%{opacity:1} 47%,100%{opacity:0}}
+@keyframes r40{0%,39.5%{opacity:0;transform:scale(.2)} 40%{opacity:.9;transform:scale(.3)} 45%{opacity:0;transform:scale(1)} 100%{opacity:0}}
+@keyframes v40-46{0%,39.5%{opacity:0} 41.5%{opacity:1} 45.5%{opacity:1} 47%,100%{opacity:0}}
+@keyframes v46-100{0%,45.5%{opacity:0} 47.5%{opacity:1} 100%{opacity:1}}
+@keyframes v46-70{0%,45.5%{opacity:0} 47.5%{opacity:1} 69.5%{opacity:1} 71%,100%{opacity:0}}
+@keyframes v30-46{0%,29.5%{opacity:0} 31.5%{opacity:1} 45.5%{opacity:1} 47%,100%{opacity:0}}
+@keyframes slideB{0%,25%{transform:translateX(70px)} 50%,100%{transform:translateX(0)}}
+@keyframes v0-25{0%{opacity:1} 24.5%{opacity:1} 26%,100%{opacity:0}}
+@keyframes v0-50{0%{opacity:1} 49.5%{opacity:1} 51%,100%{opacity:0}}
+</style>
+
+</head>
+<body>
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M3 21V3h18v8h-8v10z"/><circle cx="10.5" cy="8.5" r="3.2"/></symbol>
+  <symbol id="i-finger2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 20v-4h8v-3h3v-3h-3V7h3V4h7v16z"/><path d="M11 16h3v4"/></symbol>
+  <symbol id="i-finger3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/><path d="M12 14.5l1.6-.9v1.8l1.6-.9v1.8l1.6-.9"/></symbol>
+  <symbol id="i-lay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M2 20h20"/><path d="M4 18l3-2.5h9L13 18z"/><path d="M12.5 13.5l5.5-9 2.6 1.6-5.5 9"/><path d="M9 7a7 7 0 0 1 5-3.5"/><path d="M13.5 2.5l.5 1.3-1.3.5"/></symbol>
+  <symbol id="i-dogbone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 21V3h18v8h-8v10z"/><circle cx="10.5" cy="8.5" r="3.2"/></symbol>
+  <symbol id="i-innerhole" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10"/><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="18" cy="18" r="2.2"/><circle cx="6" cy="18" r="2.2"/></symbol>
+  <symbol id="i-outerhole" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 20V5h6v6h6V5h6v15z"/><circle cx="7.6" cy="12.4" r="2.2"/><circle cx="16.4" cy="12.4" r="2.2"/></symbol>
+  <symbol id="i-mortise" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4 13h16v8H4z"/><path d="M10 13V3h4v10"/><path d="M10 21v-8M14 21v-8"/></symbol>
+  <symbol id="i-faces" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 5h16v15H4z"/><path d="M4 12.5h4.5M7 11l1.5 1.5L7 14"/><path d="M20 12.5h-4.5M17 11l-1.5 1.5 1.5 1.5"/><path d="M12 20v-4.5M10.5 17l1.5-1.5 1.5 1.5"/></symbol>
+  <symbol id="i-sub" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2 16l6-6h13l-6 6z"/><path d="M12 11v9l2.2-2.2 1.6 3.2 1.6-.8-1.6-3.2H19z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 11l9-7 9 7v10h-6v-6H9v6H3z"/></symbol>
+  <symbol id="i-install" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3v11M8 10l4 4 4-4"/><path d="M4 17v3h16v-3"/></symbol>
+  <symbol id="i-flow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M7.5 6H14a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6.5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4 4h7a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4z"/><path d="M20 4h-7a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h7z"/></symbol>
+  <symbol id="i-bug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></symbol>
+  <symbol id="i-concept" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.8.6 1.5 1.5 1.5 2.1h4c0-.6.7-1.5 1.5-2.1A6 6 0 0 0 12 3z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+  <symbol id="i-yt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="3"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor" stroke="none"/></symbol>
+</svg>
+
+<header class="topbar">
+  <button class="menubtn" id="menubtn" type="button" aria-expanded="false" aria-controls="sidenav">Menu</button>
+  <a class="brand" href="#home"><svg><use href="#i-logo"/></svg>Rhino Tools Wiki <span class="sub">Python scripts for sheet-goods makers</span></a>
+  <label class="search"><svg><use href="#i-search"/></svg><input id="search" type="search" placeholder="Search pages…" aria-label="Search pages" autocomplete="off"></label>
+</header>
+
+<div class="shell">
+<nav class="sidenav" id="sidenav" aria-label="Pages">
+  <h4>Start here</h4>
+  <ul>
+    <li data-k="overview index tools list"><a href="#home"><svg><use href="#i-home"/></svg>Home</a></li>
+    <li data-k="setup alias RunPythonScript clone python ironpython rhino 8 units inches millimetres"><a href="#install"><svg><use href="#i-install"/></svg>Install &amp; aliases</a></li>
+    <li data-k="process pipeline box laser router export dxf nest"><a href="#workflow"><svg><use href="#i-flow"/></svg>Workflow: model to cutter</a></li>
+    <li data-k="bugs fixme flip error esc units todo"><a href="#known-issues"><svg><use href="#i-bug"/></svg>Known issues</a></li>
+    <li data-k="terms definitions extrusion polysurface brep cplane osnap boolean kerf endmill"><a href="#glossary"><svg><use href="#i-book"/></svg>Glossary</a></li>
+    <li data-k="edit contribute host github pages add page"><a href="#about"><svg><use href="#i-info"/></svg>About this wiki</a></li>
+  </ul>
+  <h4>Joinery</h4>
+  <ul>
+    <li data-k="box joint comb fingers concept eli5"><a href="#finger-joints"><svg><use href="#i-concept"/></svg>Finger joints 101</a></li>
+    <li data-k="two.py fingerjoint box joint L T intersection two planes"><a href="#finger2"><svg><use href="#i-finger2"/></svg>finger2<span class="al">two.py</span></a></li>
+    <li data-k="xyz.py fingerjoint box three planes cube"><a href="#finger3"><svg><use href="#i-finger3"/></svg>finger3<span class="al">xyz.py</span></a></li>
+    <li data-k="mortisetenon.py tenon mortise peg slot shelf through"><a href="#mortisetenon"><svg><use href="#i-mortise"/></svg>mortisetenon<span class="al">mortisetenon.py</span></a></li>
+  </ul>
+  <h4>Relief cuts</h4>
+  <ul>
+    <li data-k="dog bone relief corner router endmill radius concept eli5 why"><a href="#dogbones"><svg><use href="#i-concept"/></svg>Why dogbones?</a></li>
+    <li data-k="dogbone.py 3d extrusion face cylinder boolean subselect dogbone-ref"><a href="#dogbone"><svg><use href="#i-dogbone"/></svg>dogbone<span class="al">dogbone.py</span></a></li>
+    <li data-k="innerhole.py curve hole pocket inner profile union"><a href="#innerhole"><svg><use href="#i-innerhole"/></svg>innerhole<span class="al">innerhole.py</span></a></li>
+    <li data-k="outerhole.py curve outer profile notch difference"><a href="#outerhole"><svg><use href="#i-outerhole"/></svg>outerhole<span class="al">outerhole.py</span></a></li>
+  </ul>
+  <h4>Layout</h4>
+  <ul>
+    <li data-k="laydown.py lay flat orient top cplane nest flatten unfold"><a href="#lay"><svg><use href="#i-lay"/></svg>lay<span class="al">laydown.py</span></a></li>
+  </ul>
+  <h4>Modeling</h4>
+  <ul>
+    <li data-k="faces.py thicken shell surfaces inward extrude experimental"><a href="#faces"><svg><use href="#i-faces"/></svg>faces<span class="al">faces.py</span></a></li>
+  </ul>
+  <h4>Internals</h4>
+  <ul>
+    <li data-k="getsubsurface.py helper library subobject face pick GetObject"><a href="#getsubsurface"><svg><use href="#i-sub"/></svg>getsubsurface<span class="al">helper</span></a></li>
+  </ul>
+  <div class="nomatch" id="nomatch">No page matches.</div>
+</nav>
+
+<main id="main">
+
+<!-- ======================================================= HOME -->
+<article class="page" id="page-home" data-title="Home">
+  <div class="hero">
+    <h1>Rhino Tools Wiki</h1>
+    <p class="lede">Reference for a small set of Rhino3d Python scripts that turn a solid model of sheet-goods parts into something a laser cutter or CNC router can cut: finger joints, mortise and tenon joints, dogbone relief cuts, and flattening parts onto the Top plane.</p>
+    <div class="links">
+      <a class="btn primary" href="#install">Install &amp; aliases</a>
+      <a class="btn" href="#workflow">See the workflow</a>
+      <a class="btn yt" href="https://www.youtube.com/playlist?list=PL6vjZyexULrxROMOXeZTPhfKZhv0Ogfqv" target="_blank" rel="noopener"><svg width="18" height="18"><use href="#i-yt"/></svg>Video playlist</a>
+    </div>
+  </div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>You design a box or a piece of furniture in Rhino as if it were already glued together. These scripts then do the fiddly carpentry on the computer: they cut the fingers that let the panels lock together, make the little round notches a router needs to cut square corners, and lay every panel flat on the floor so the machine can cut it out of a sheet.</p>
+  </div>
+
+  <section class="family">
+    <h2>Joinery <small>make panels hold on to each other</small></h2>
+    <div class="seealso">
+      <a class="card" href="#finger-joints"><span class="t"><svg><use href="#i-concept"/></svg>Finger joints 101</span><span class="d">Why boxes have fingers and what "odd number" means.</span></a>
+      <a class="card" href="#finger2"><span class="t"><svg><use href="#i-finger2"/></svg>finger2<span class="al">two.py</span></span><span class="d">Finger-joint two sets of panels that meet at a right angle.</span></a>
+      <a class="card" href="#finger3"><span class="t"><svg><use href="#i-finger3"/></svg>finger3<span class="al">xyz.py</span></span><span class="d">Finger-joint a whole box: three mutually perpendicular sets.</span></a>
+      <a class="card" href="#mortisetenon"><span class="t"><svg><use href="#i-mortise"/></svg>mortisetenon</span><span class="d">Grow tenons from one part and cut matching mortises in another.</span></a>
+    </div>
+  </section>
+  <section class="family">
+    <h2>Relief cuts <small>let a round cutter make a square corner</small></h2>
+    <div class="seealso">
+      <a class="card" href="#dogbones"><span class="t"><svg><use href="#i-concept"/></svg>Why dogbones?</span><span class="d">A router bit has a radius. Inside corners need help.</span></a>
+      <a class="card" href="#dogbone"><span class="t"><svg><use href="#i-dogbone"/></svg>dogbone</span><span class="d">Dogbone the inside corners of a 3D extrusion's face.</span></a>
+      <a class="card" href="#innerhole"><span class="t"><svg><use href="#i-innerhole"/></svg>innerhole</span><span class="d">Dogbone a closed curve that is a hole or pocket.</span></a>
+      <a class="card" href="#outerhole"><span class="t"><svg><use href="#i-outerhole"/></svg>outerhole</span><span class="d">Dogbone the notches in a part's outer profile.</span></a>
+    </div>
+  </section>
+  <section class="family">
+    <h2>Layout <small>get parts ready for the machine</small></h2>
+    <div class="seealso">
+      <a class="card" href="#lay"><span class="t"><svg><use href="#i-lay"/></svg>lay<span class="al">laydown.py</span></span><span class="d">Lay each panel face-down on the Top construction plane.</span></a>
+    </div>
+  </section>
+  <section class="family">
+    <h2>Modeling and internals</h2>
+    <div class="seealso">
+      <a class="card" href="#faces"><span class="t"><svg><use href="#i-faces"/></svg>faces <span class="badge exp">experimental</span></span><span class="d">Thicken a shell of surfaces into panels, growing inward.</span></a>
+      <a class="card" href="#getsubsurface"><span class="t"><svg><use href="#i-sub"/></svg>getsubsurface</span><span class="d">The shared "click one face of a solid" helper.</span></a>
+    </div>
+  </section>
+
+  <h2>Which tool do I want?</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>I have…</th><th>I want…</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>Two sets of panels that overlap at a right angle (an L or a T)</td><td>Box-joint fingers along the shared edge</td><td><a class="cmd" href="#finger2">finger2</a></td></tr>
+      <tr><td>A box whose panels face X, Y and Z</td><td>Fingers on every edge in one go</td><td><a class="cmd" href="#finger3">finger3</a></td></tr>
+      <tr><td>A shelf or divider that meets a panel face</td><td>Tabs on one, matching slots in the other</td><td><a class="cmd" href="#mortisetenon">mortisetenon</a></td></tr>
+      <tr><td>A solid panel with slots or pockets, cut on a CNC router</td><td>Relief at the inside corners</td><td><a class="cmd" href="#dogbone">dogbone</a></td></tr>
+      <tr><td>A closed curve that is a hole</td><td>Relief at its corners, in 2D</td><td><a class="cmd" href="#innerhole">innerhole</a></td></tr>
+      <tr><td>A closed curve that is a part outline with notches</td><td>Relief at the notch corners, in 2D</td><td><a class="cmd" href="#outerhole">outerhole</a></td></tr>
+      <tr><td>Finished 3D parts in their assembled positions</td><td>Everything flat on Top, ready to cut</td><td><a class="cmd" href="#lay">lay</a></td></tr>
+    </tbody>
+  </table></div>
+</article>
+
+<!-- ======================================================= INSTALL -->
+<article class="page" id="page-install" data-title="Install &amp; aliases" data-crumb="Start here">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Start here</span><span>Install &amp; aliases</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-install"/></svg></div><div><h1>Install &amp; aliases</h1><p class="lede">Clone the repository, point a Rhino alias at each script, and run them like built-in commands.</p></div></div>
+
+  <h2>1. Clone the repository</h2>
+  <pre><code>git clone https://github.com/notkoosh/rhinotools.git</code></pre>
+  <p>Keep the folder layout as it is. Three scripts import the helper module <a href="#getsubsurface">getsubsurface</a> from the same folder, and the two finger-joint scripts import <code>finger.py</code> from the <code>fingerjoint</code> folder. Rhino adds a script's own folder to the import path when it runs it, so the imports work as long as the files stay together.</p>
+
+  <h2>2. Add aliases</h2>
+  <p>Open <em>Options → Aliases</em> (Windows) or <em>Preferences → Aliases</em> (Mac). Each alias runs <code>RunPythonScript</code> with the full path to a script. The leading <code>!-_</code> cancels any running command and suppresses the dialog. Replace the path with wherever you cloned the repository.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Alias</th><th>Command macro</th><th>Does</th></tr></thead>
+    <tbody>
+      <tr><td class="k"><a href="#finger2">finger2</a></td><td class="k">!-_RunPythonScript (C:\path\rhinotools\fingerjoint\two.py)</td><td>Finger-joint two orthogonal sets of panels</td></tr>
+      <tr><td class="k"><a href="#finger3">finger3</a></td><td class="k">!-_RunPythonScript (C:\path\rhinotools\fingerjoint\xyz.py)</td><td>Finger-joint three mutually orthogonal sets</td></tr>
+      <tr><td class="k"><a href="#lay">lay</a></td><td class="k">!-_RunPythonScript (C:\path\rhinotools\laydown.py)</td><td>Lay panels flat on Top</td></tr>
+      <tr><td class="k"><a href="#dogbone">dogbone</a></td><td class="k">!-_RunPythonScript (C:\path\rhinotools\dogbone.py)</td><td>Dogbone an extrusion face</td></tr>
+      <tr><td class="k"><a href="#innerhole">innerhole</a></td><td class="k">!-_RunPythonScript (C:\path\rhinotools\innerhole.py)</td><td>Dogbone a hole curve</td></tr>
+      <tr><td class="k"><a href="#outerhole">outerhole</a></td><td class="k">!-_RunPythonScript (C:\path\rhinotools\outerhole.py)</td><td>Dogbone an outer-profile curve</td></tr>
+      <tr><td class="k"><a href="#mortisetenon">mt</a> <span class="muted">(suggested)</span></td><td class="k">!-_RunPythonScript (C:\path\rhinotools\mortisetenon.py)</td><td>Mortise and tenon</td></tr>
+      <tr><td class="k"><a href="#faces">faces</a> <span class="muted">(suggested)</span></td><td class="k">!-_RunPythonScript (C:\path\rhinotools\faces.py)</td><td>Thicken a surface shell inward</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small muted">The first six names are the ones the author uses; the README only documents those. <code>mt</code> and <code>faces</code> are suggestions for the two scripts the README does not mention.</p>
+
+  <h2>3. Check your Python engine</h2>
+  <p>The scripts are written for <a class="term" href="#glossary" title="The Python 2.7 implementation that Rhino 5, 6 and 7 use for RunPythonScript.">IronPython 2.7</a>: they use <code>print "…"</code> statements, <code>reduce</code> and <code>reload</code>. They run unchanged in Rhino 5, 6 and 7. Rhino 8 still ships the IronPython 2 engine and should run a plain <code>.py</code> file with it; if the editor offers a choice, pick IronPython 2, or put <code>#! python 2</code> on the first line of the script.</p>
+
+  <h2>4. Check your units</h2>
+  <div class="callout warn"><span class="tag">Important</span>A few constants in the scripts assume an inch-scale model. If you model in millimetres, change them before use.</div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Where</th><th>Constant</th><th>Meaning</th><th>For millimetres</th></tr></thead>
+    <tbody>
+      <tr><td class="k">dogbone.py:23<br>innerhole.py:8<br>outerhole.py:8</td><td class="k">number=0.25</td><td>Default cutter diameter offered at the prompt</td><td>Only a default; type your real diameter (for example 6.35)</td></tr>
+      <tr><td class="k">dogbone.py:133-136</td><td class="k">-10 … 10</td><td>Height of the cylinder cut through the panel, either side of the clicked face</td><td>Must exceed the panel thickness; raise to about <code>-50 … 50</code></td></tr>
+      <tr><td class="k">fingerjoint/finger.py:64</td><td class="k">AddCircle(plane, 100)</td><td>Radius of the slicing cylinders around the joint line</td><td>Must exceed the distance from the line to the far side of the joint; raise to about <code>2500</code></td></tr>
+      <tr><td class="k">faces.py:32</td><td class="k">VectorScale(…, 0.25)</td><td>Panel thickness that <a href="#faces">faces</a> extrudes</td><td>Set to your sheet thickness, for example <code>6</code> or <code>18</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#workflow"><span class="t"><svg><use href="#i-flow"/></svg>Workflow</span><span class="d">The order the tools are meant to run in.</span></a>
+    <a class="card" href="#known-issues"><span class="t"><svg><use href="#i-bug"/></svg>Known issues</span><span class="d">The FIXMEs, collected in one place.</span></a>
+    <a class="card" href="#glossary"><span class="t"><svg><use href="#i-book"/></svg>Glossary</span><span class="d">Extrusion, polysurface, CPlane, osnap, kerf…</span></a>
+  </div>
+</article>
+
+<!-- ======================================================= WORKFLOW -->
+<article class="page" id="page-workflow" data-title="Workflow" data-crumb="Start here">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Start here</span><span>Workflow</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-flow"/></svg></div><div><h1>Workflow: from model to cutter</h1><p class="lede">The tools are small on purpose. Together they take an assembled model of sheet-goods parts and hand you flat outlines ready to cut.</p></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>Build the thing whole. Then: make the panels grab each other (joinery), fix the corners a round cutter cannot make (dogbones), and knock every panel flat (lay). Export the outlines. Cut.</p>
+  </div>
+
+  <ol class="flow">
+    <li><span class="n">1</span><div><h3>Model the parts as solids</h3><p>Each panel is an <a class="term" href="#glossary" title="A solid made by pushing a flat profile straight along a direction. Rhino's Box and ExtrudeCrv make these.">extrusion</a> or an extrusion-like polysurface, exactly as thick as your sheet, sitting where it belongs in the assembly. Where two panels meet, let them overlap through each other: the joinery tools work on the overlapping volume. If you only have zero-thickness surfaces, <a class="cmd" href="#faces">faces</a> can thicken them.</p></div></li>
+    <li><span class="n">2</span><div><h3>Finger-joint the box</h3><p><a class="cmd" href="#finger3">finger3</a> for a full box, <a class="cmd" href="#finger2">finger2</a> for a single L or T. The tools pick which part keeps which slice of the overlap, then subtract.</p></div></li>
+    <li><span class="n opt">3</span><div><h3>Add shelves and dividers <span class="muted small">optional</span></h3><p><a class="cmd" href="#mortisetenon">mortisetenon</a> grows tabs out of one part and cuts matching slots through another. Draw the tab outlines on the face first.</p></div></li>
+    <li><span class="n opt">4</span><div><h3>Relieve inside corners <span class="muted small">router only</span></h3><p>A laser leaves square corners, so skip this step for laser cutting. For a CNC router, run <a class="cmd" href="#dogbone">dogbone</a> on every face with an inside corner that a mating part must fit into: finger notches, mortises, slots. See <a href="#dogbones">Why dogbones?</a></p></div></li>
+    <li><span class="n">5</span><div><h3>Lay everything flat</h3><p><a class="cmd" href="#lay">lay</a> copies each panel onto the Top plane, face down, on its own layer. The originals stay hidden so the model survives.</p></div></li>
+    <li><span class="n">6</span><div><h3>Nest, outline, export</h3><p>Arrange the flat copies on a sheet (by hand, or with a nesting plugin). Use Rhino's <code>Make2D</code> or <code>DupBorder</code> on the top faces to get curves, then export as DXF or PDF for your cutter. If you work with 2D curves instead of solids, <a class="cmd" href="#innerhole">innerhole</a> and <a class="cmd" href="#outerhole">outerhole</a> add dogbones directly to the curves.</p></div></li>
+  </ol>
+
+  <div class="callout"><span class="tag">Tip</span>Save before each boolean-heavy step. The joinery tools delete and recreate the parts they touch, so Undo works but is slow on large models.</div>
+</article>
+
+<!-- ======================================================= FINGER JOINTS 101 -->
+<article class="page" id="page-finger-joints" data-title="Finger joints 101" data-crumb="Joinery">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Joinery</span><span>Finger joints 101</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-concept"/></svg></div><div><h1>Finger joints 101</h1><p class="lede">What the finger-joint tools are actually building, and why they ask for an odd number.</p><div class="chips"><span class="badge concept">concept</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>Lace your fingers together. Each hand fills the gaps between the other hand's fingers, and the two hands cannot slide sideways. A finger joint (also called a box joint) does that with two plates: the end of one is cut into tabs, the end of the other into matching gaps.</p>
+  </div>
+
+  <div class="anim" style="--dur:8s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><g><rect x="40" y="45" width="190" height="160" class="ply2d"/><rect x="230" y="77" width="22" height="32" class="ply2d"/><rect x="230" y="141" width="22" height="32" class="ply2d"/></g><g class="a" style="animation-name:slideB"><rect x="230" y="45" width="22" height="32" class="oak2d"/><rect x="230" y="109" width="22" height="32" class="oak2d"/><rect x="230" y="173" width="22" height="32" class="oak2d"/><rect x="252" y="45" width="140" height="160" class="oak2d faint"/></g><text x="135.0" y="31.0" class="lbl mid" data-a="" style="animation-name:v0-100" opacity="1">plate 1 (seen from above)</text><text x="330.0" y="31.0" class="lbl mid" data-a="" style="animation-name:v0-100" opacity="1">plate 2 (standing, seen edge-on)</text><text x="270.0" y="91.0" class="lbl start" data-a="" style="animation-name:v0-25" opacity="0">fingers</text><text x="270.0" y="123.0" class="lbl start" data-a="" style="animation-name:v0-25" opacity="0">notches</text><text x="150.0" y="227.0" class="lbl mid dimmed" data-a="" style="animation-name:v0-100" opacity="1">finger depth = plate thickness</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-50" opacity="0">A finger joint: alternating tabs on each plate fill each other's gaps.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v50-100" opacity="1">With an odd count (5), both end pieces belong to the same plate.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>two plates, five fingers</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <h2>What the tools compute</h2>
+  <p>When two panels of the same thickness meet at a right angle and overlap, the overlap is a bar as wide as the sheet is thick and as long as the joint. The tools slice that bar into <em>N</em> equal pieces along the joint and give the pieces alternately to one panel and the other. Each panel then loses the pieces it was not given. Nothing else about the panels changes, so the joint fits exactly, with zero clearance.</p>
+  <ul>
+    <li><strong>Finger length equals sheet thickness.</strong> It cannot be anything else when the panels simply overlap.</li>
+    <li><strong>Finger width is joint length ÷ N.</strong> You choose N (the "subdivisions" prompt), not the width. Pick N so the width is a comfortable size for your material.</li>
+    <li><strong>Odd N looks right.</strong> With an odd count the two end pieces go to the same panel, so a box edge starts and ends with the same part showing. Even counts work but look lopsided.</li>
+    <li><strong>No kerf or clearance.</strong> The joint is modelled tight. For a laser cutter the kerf usually gives you the slack you need. For a router you must dogbone the gaps and may want to offset outlines yourself.</li>
+  </ul>
+
+  <h2>Where to go next</h2>
+  <div class="seealso">
+    <a class="card" href="#finger2"><span class="t"><svg><use href="#i-finger2"/></svg>finger2</span><span class="d">One joint: two sets of panels.</span></a>
+    <a class="card" href="#finger3"><span class="t"><svg><use href="#i-finger3"/></svg>finger3</span><span class="d">Whole box: three sets.</span></a>
+    <a class="card" href="#dogbones"><span class="t"><svg><use href="#i-concept"/></svg>Why dogbones?</span><span class="d">Routers need square corners relieved.</span></a>
+  </div>
+</article>
+<!-- ======================================================= FINGER2 -->
+<article class="page" id="page-finger2" data-title="finger2" data-crumb="Joinery">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Joinery</span><span>finger2</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-finger2"/></svg></div><div><h1>finger2</h1><p class="lede">Finger-joint two orthogonal sets of panels where they overlap.</p>
+    <div class="chips"><span class="chip"><b>alias</b> finger2</span><span class="chip"><b>script</b> fingerjoint/two.py</span><span class="badge stable">documented</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>Two boards cross through each other at a corner. Tell the tool which boards belong to which side, how many fingers you want, and draw a line along the corner. It slices the shared chunk into fingers and hands every other finger to the other board.</p>
+  </div>
+
+  <div class="anim" style="--dur:14s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><g data-a="" style="animation-name:v0-80" opacity="0"><g class="ply"><polygon points="100.0,196.0 260.0,196.0 260.0,182.0 100.0,182.0" class="front"/><polygon points="260.0,196.0 314.0,162.4 314.0,148.4 260.0,182.0" class="side"/><polygon points="100.0,182.0 260.0,182.0 314.0,148.4 154.0,148.4" class="top"/></g><g class="oak"><polygon points="246.0,196.0 260.0,196.0 260.0,124.0 246.0,124.0" class="front"/><polygon points="260.0,196.0 314.0,162.4 314.0,90.4 260.0,124.0" class="side"/><polygon points="246.0,124.0 260.0,124.0 314.0,90.4 300.0,90.4" class="top"/></g><g data-a="" style="animation-name:v12-80" opacity="0"><polygon points="246.0,196.0 260.0,196.0 260.0,182.0 246.0,182.0" class="ghost"/><polygon points="260.0,196.0 314.0,162.4 314.0,148.4 260.0,182.0" class="ghost"/><polygon points="246.0,182.0 260.0,182.0 314.0,148.4 300.0,148.4" class="ghost"/></g><g data-a="" style="animation-name:v48-80" opacity="0"><line x1="270.8" y1="189.3" x2="270.8" y2="175.3" class="slice"/><line x1="281.6" y1="182.6" x2="281.6" y2="168.6" class="slice"/><line x1="292.4" y1="175.8" x2="292.4" y2="161.8" class="slice"/><line x1="303.2" y1="169.1" x2="303.2" y2="155.1" class="slice"/></g><g data-a="" style="animation-name:v65-80" opacity="0"><g class="oak"><polygon points="260.0,196.0 270.8,189.3 270.8,175.3 260.0,182.0" class="side"/></g><text x="271.4" y="188.6" class="tiny">0</text><g class="ply"><polygon points="270.8,189.3 281.6,182.6 281.6,168.6 270.8,175.3" class="side"/></g><text x="282.2" y="181.9" class="tiny">1</text><g class="oak"><polygon points="281.6,182.6 292.4,175.8 292.4,161.8 281.6,168.6" class="side"/></g><text x="293.0" y="175.2" class="tiny">2</text><g class="ply"><polygon points="292.4,175.8 303.2,169.1 303.2,155.1 292.4,161.8" class="side"/></g><text x="303.8" y="168.5" class="tiny">3</text><g class="oak"><polygon points="303.2,169.1 314.0,162.4 314.0,148.4 303.2,155.1" class="side"/></g><text x="314.6" y="161.8" class="tiny">4</text></g><circle cx="260.0" cy="182.0" r="4" class="click" data-a="" style="animation-name:v30-80" opacity="0"/><circle cx="260.0" cy="182.0" r="14" class="click-ring a" style="animation-name:r30;transform-origin:260.0px 182.0px" opacity="0"/><circle cx="314.0" cy="148.4" r="4" class="click" data-a="" style="animation-name:v36-80" opacity="0"/><circle cx="314.0" cy="148.4" r="14" class="click-ring a" style="animation-name:r36;transform-origin:314.0px 148.4px" opacity="0"/><line x1="260.0" y1="182.0" x2="314.0" y2="148.4" class="edge" data-a="" style="animation-name:w37-45-64-80;stroke-dasharray:66 66" opacity="0"/></g><g data-a="" style="animation-name:v80-100" opacity="1"><g class="ply"><polygon points="100.0,196.0 260.0,196.0 260.0,182.0 100.0,182.0" class="front"/><polygon points="260.0,196.0 314.0,162.4 314.0,148.4 260.0,182.0" class="side"/><polygon points="100.0,182.0 260.0,182.0 314.0,148.4 154.0,148.4" class="top"/></g><clipPath id="clip1"><polygon points="246.0,182.0 260.0,182.0 270.8,175.3 256.8,175.3" class="void"/><polygon points="260.0,196.0 270.8,189.3 270.8,175.3 260.0,182.0" class="void"/><polygon points="246.0,196.0 260.0,196.0 260.0,182.0 246.0,182.0" class="void"/></clipPath><polygon points="246.0,182.0 260.0,182.0 270.8,175.3 256.8,175.3" class="void"/><polygon points="260.0,196.0 270.8,189.3 270.8,175.3 260.0,182.0" class="void"/><polygon points="246.0,196.0 260.0,196.0 260.0,182.0 246.0,182.0" class="void"/><g clip-path="url(#clip1)"><g class="ply"><polygon points="246.0,196.0 256.8,189.3 256.8,175.3 246.0,182.0" class="side"/><polygon points="256.8,189.3 270.8,189.3 270.8,175.3 256.8,175.3" class="front"/></g></g><clipPath id="clip2"><polygon points="267.6,168.6 281.6,168.6 292.4,161.8 278.4,161.8" class="void"/><polygon points="281.6,182.6 292.4,175.8 292.4,161.8 281.6,168.6" class="void"/></clipPath><polygon points="267.6,168.6 281.6,168.6 292.4,161.8 278.4,161.8" class="void"/><polygon points="281.6,182.6 292.4,175.8 292.4,161.8 281.6,168.6" class="void"/><g clip-path="url(#clip2)"><g class="ply"><polygon points="267.6,182.6 278.4,175.8 278.4,161.8 267.6,168.6" class="side"/><polygon points="278.4,175.8 292.4,175.8 292.4,161.8 278.4,161.8" class="front"/></g></g><clipPath id="clip3"><polygon points="289.2,155.1 303.2,155.1 314.0,148.4 300.0,148.4" class="void"/><polygon points="303.2,169.1 314.0,162.4 314.0,148.4 303.2,155.1" class="void"/></clipPath><polygon points="289.2,155.1 303.2,155.1 314.0,148.4 300.0,148.4" class="void"/><polygon points="303.2,169.1 314.0,162.4 314.0,148.4 303.2,155.1" class="void"/><g clip-path="url(#clip3)"><g class="ply"><polygon points="289.2,169.1 300.0,162.4 300.0,148.4 289.2,155.1" class="side"/><polygon points="300.0,162.4 314.0,162.4 314.0,148.4 300.0,148.4" class="front"/></g></g><g class="a lift" style="animation-name:lift70"><g class="oak"><polygon points="246.0,196.0 260.0,196.0 260.0,124.0 246.0,124.0" class="front"/><polygon points="260.0,196.0 314.0,162.4 314.0,90.4 260.0,124.0" class="side"/><polygon points="246.0,124.0 260.0,124.0 314.0,90.4 300.0,90.4" class="top"/></g><clipPath id="clip4"><polygon points="270.8,189.3 281.6,182.6 281.6,168.6 270.8,175.3" class="void"/></clipPath><polygon points="270.8,189.3 281.6,182.6 281.6,168.6 270.8,175.3" class="void"/><g clip-path="url(#clip4)"><g class="oak"><polygon points="267.6,182.6 281.6,182.6 281.6,168.6 267.6,168.6" class="front"/></g></g><clipPath id="clip5"><polygon points="292.4,175.8 303.2,169.1 303.2,155.1 292.4,161.8" class="void"/></clipPath><polygon points="292.4,175.8 303.2,169.1 303.2,155.1 292.4,161.8" class="void"/><g clip-path="url(#clip5)"><g class="oak"><polygon points="289.2,169.1 303.2,169.1 303.2,155.1 289.2,155.1" class="front"/></g></g></g><text x="307.0" y="61.2" class="lbl start" data-a="" style="animation-name:v80-100" opacity="1">plane 2</text><text x="167.0" y="145.2" class="lbl" data-a="" style="animation-name:v80-100" opacity="1">plane 1</text></g><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-12" opacity="0">Two extrusions overlap at a corner (an L or a T).</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v12-30" opacity="0">The tool computes the volume they share.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v30-48" opacity="0">You click two points along the joint edge.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v48-65" opacity="0">The shared volume is sliced into 5 pieces along that line.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v65-80" opacity="0">Even pieces are cut from plane 1, odd pieces from plane 2.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v80-100" opacity="1">Result: interlocking fingers. Pull apart to see them.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>an L joint with 5 subdivisions</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>Both sets are closed <a class="term" href="#glossary" title="A solid made of several joined surfaces. Extrusions, boxes and anything made with BooleanUnion count.">polysurfaces</a> (extrusions or boxes). The selection filter only accepts polysurfaces.</li>
+    <li>The two sets are perpendicular and physically overlap where the joint goes. No overlap, no fingers.</li>
+    <li>"Plane 1" and "plane 2" are just the two sides of the joint: for example all the horizontal shelves and all the vertical uprights. Several panels per side are fine; every pair that overlaps gets fingered.</li>
+  </ul>
+
+  <h2>Steps</h2>
+  <ol class="steps">
+    <li>Run <code>finger2</code>. <span class="prompt">select plane 1 objects</span> Pick the panels on one side of the joint, then <kbd>Enter</kbd>.</li>
+    <li><span class="prompt">select plane 2 objects</span> Pick the panels on the other side, then <kbd>Enter</kbd>.</li>
+    <li><span class="prompt">enter subdivisions (odd)</span> Type the number of fingers along the joint (default 5, minimum 2). Odd numbers give symmetrical ends; see <a href="#finger-joints">Finger joints 101</a>.</li>
+    <li><span class="prompt">select start of intersection</span> and <span class="prompt">select end of intersection</span>: click two points along an edge of the joint. Any edge of the overlapping bar works; what matters is the direction and the length. Snap to the ends of the joint so the fingers cover its whole length.</li>
+    <li>The redraw pauses while the booleans run. When it returns, every overlapping pair has been fingered.</li>
+  </ol>
+
+  <h2>Prompts</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Prompt</th><th>Expected input</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="k">select plane 1 objects</td><td>One or more polysurfaces</td><td>Even-numbered pieces (0, 2, 4…) are cut from these.</td></tr>
+      <tr><td class="k">select plane 2 objects</td><td>One or more polysurfaces</td><td>Odd-numbered pieces (1, 3…) are cut from these.</td></tr>
+      <tr><td class="k">enter subdivisions (odd)</td><td>Integer ≥ 2</td><td>Default 5. Number of pieces along the drawn line.</td></tr>
+      <tr><td class="k">select start of intersection</td><td>Point</td><td>Use osnaps. First end of the joint.</td></tr>
+      <tr><td class="k">select end of intersection</td><td>Point</td><td>Other end. The line between them is the slicing axis.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>How it works</h2>
+  <ul>
+    <li>For every pair (plane 1 panel, plane 2 panel) the script computes their <a class="term" href="#glossary" title="BooleanIntersection: the solid volume two solids have in common.">boolean intersection</a>: the overlap bar.</li>
+    <li>It splits your line into N equal steps and, for each step, builds a big cylinder (radius 100 units) whose axis is the line and whose length is one step.</li>
+    <li>Each overlap bar is intersected with each cylinder, which cuts it into N pieces. Even pieces are queued for subtraction from the plane 1 panel, odd pieces from the plane 2 panel.</li>
+    <li>Finally every panel has its queued pieces subtracted in one <code>BooleanDifference</code>.</li>
+  </ul>
+
+  <h2>Tips and gotchas</h2>
+  <ul>
+    <li><strong>Draw the line the full length of the joint.</strong> Fingers only exist along the line. A short line leaves the ends of the overlap in place as a solid lump.</li>
+    <li><strong>Keep panels within 100 units of the line.</strong> The slicing cylinders have a fixed radius of 100 model units (<code>finger.py:64</code>). In millimetres that is only 10 cm; see <a href="#install">units</a>.</li>
+    <li><strong>No kerf compensation.</strong> The joint is modelled with zero clearance. For a router, run <a class="cmd" href="#dogbone">dogbone</a> on the finger notches afterwards.</li>
+    <li><strong>Several panels per side is the point.</strong> A T-shaped shelf through an upright is one call: shelf on side 1, upright on side 2.</li>
+    <li>A failed boolean (non-manifold input, coincident faces that do not quite overlap) leaves the pair untouched; check for stray pieces afterwards.</li>
+  </ul>
+
+  <h2>Known issues</h2>
+  <ul>
+    <li>You choose finger <em>count</em>, not finger <em>width</em>. <span class="fixme">TODO</span></li>
+    <li>No kerf control. <span class="fixme">TODO</span></li>
+    <li>The joint axis must be drawn; it is not derived from the geometry. <span class="fixme">TODO</span></li>
+  </ul>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#finger3"><span class="t"><svg><use href="#i-finger3"/></svg>finger3</span><span class="d">Same thing for three sets at once.</span></a>
+    <a class="card" href="#finger-joints"><span class="t"><svg><use href="#i-concept"/></svg>Finger joints 101</span><span class="d">Why odd, why thickness-deep.</span></a>
+    <a class="card" href="#dogbone"><span class="t"><svg><use href="#i-dogbone"/></svg>dogbone</span><span class="d">Relieve the notches for a router.</span></a>
+    <a class="card" href="#lay"><span class="t"><svg><use href="#i-lay"/></svg>lay</span><span class="d">Flatten the finished parts.</span></a>
+  </div>
+  <p class="src">Source: <a href="https://github.com/notkoosh/rhinotools/blob/master/fingerjoint/two.py" target="_blank" rel="noopener">fingerjoint/two.py</a>, <a href="https://github.com/notkoosh/rhinotools/blob/master/fingerjoint/finger.py" target="_blank" rel="noopener">fingerjoint/finger.py</a>. Video: <a class="yt" href="https://www.youtube.com/watch?v=rmOKhCwasbA" target="_blank" rel="noopener">the finger-joint tool in action</a>.</p>
+</article>
+
+<!-- ======================================================= FINGER3 -->
+<article class="page" id="page-finger3" data-title="finger3" data-crumb="Joinery">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Joinery</span><span>finger3</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-finger3"/></svg></div><div><h1>finger3</h1><p class="lede">Finger-joint three mutually perpendicular sets of panels: the box case.</p>
+    <div class="chips"><span class="chip"><b>alias</b> finger3</span><span class="chip"><b>script</b> fingerjoint/xyz.py</span><span class="badge stable">documented</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>A box has panels facing three ways: left-right, front-back, up-down. This tool runs <a class="cmd" href="#finger2">finger2</a> three times, once for each pair of directions, and hides the third set each time so you can see the edge you need to draw.</p>
+  </div>
+
+  <div class="anim" style="--dur:14s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><g data-a="" style="animation-name:d50-70"><g class="oak"><polygon points="246.0,206.0 260.0,206.0 260.0,106.0 246.0,106.0" class="front"/><polygon points="260.0,206.0 314.0,172.4 314.0,72.4 260.0,106.0" class="side"/><polygon points="246.0,106.0 260.0,106.0 314.0,72.4 300.0,72.4" class="top"/></g></g><g data-a="" style="animation-name:d30-50"><g class="ply"><polygon points="100.0,206.0 260.0,206.0 260.0,106.0 100.0,106.0" class="front"/><polygon points="260.0,206.0 266.3,202.1 266.3,102.1 260.0,106.0" class="side"/><polygon points="100.0,106.0 260.0,106.0 266.3,102.1 106.3,102.1" class="top"/></g></g><g data-a="" style="animation-name:d10-30"><g class="maple"><polygon points="100.0,120.0 260.0,120.0 260.0,106.0 100.0,106.0" class="front"/><polygon points="260.0,120.0 314.0,86.4 314.0,72.4 260.0,106.0" class="side"/><polygon points="100.0,106.0 260.0,106.0 314.0,72.4 154.0,72.4" class="top"/></g></g><text x="297.0" y="139.2" class="lbl" data-a="" style="animation-name:v0-70" opacity="0">X</text><text x="177.3" y="157.7" class="lbl" data-a="" style="animation-name:v0-70" opacity="0">Y</text><text x="207.0" y="77.2" class="lbl" data-a="" style="animation-name:v0-70" opacity="0">Z</text><circle cx="260.0" cy="206.0" r="4" class="click" data-a="" style="animation-name:v12-30" opacity="0"/><circle cx="260.0" cy="206.0" r="14" class="click-ring a" style="animation-name:r12;transform-origin:260.0px 206.0px" opacity="0"/><circle cx="260.0" cy="106.0" r="4" class="click" data-a="" style="animation-name:v17-30" opacity="0"/><circle cx="260.0" cy="106.0" r="14" class="click-ring a" style="animation-name:r17;transform-origin:260.0px 106.0px" opacity="0"/><line x1="260.0" y1="206.0" x2="260.0" y2="106.0" class="edge" data-a="" style="animation-name:w18-25-100-30;stroke-dasharray:102 102" opacity="0"/><circle cx="260.0" cy="106.0" r="4" class="click" data-a="" style="animation-name:v32-50" opacity="0"/><circle cx="260.0" cy="106.0" r="14" class="click-ring a" style="animation-name:r32;transform-origin:260.0px 106.0px" opacity="0"/><circle cx="314.0" cy="72.4" r="4" class="click" data-a="" style="animation-name:v37-50" opacity="0"/><circle cx="314.0" cy="72.4" r="14" class="click-ring a" style="animation-name:r37;transform-origin:314.0px 72.4px" opacity="0"/><line x1="260.0" y1="106.0" x2="314.0" y2="72.4" class="edge" data-a="" style="animation-name:w38-45-64-50;stroke-dasharray:66 66" opacity="0"/><circle cx="100.0" cy="106.0" r="4" class="click" data-a="" style="animation-name:v52-70" opacity="0"/><circle cx="100.0" cy="106.0" r="14" class="click-ring a" style="animation-name:r52;transform-origin:100.0px 106.0px" opacity="0"/><circle cx="260.0" cy="106.0" r="4" class="click" data-a="" style="animation-name:v57-70" opacity="0"/><circle cx="260.0" cy="106.0" r="14" class="click-ring a" style="animation-name:r57;transform-origin:260.0px 106.0px" opacity="0"/><line x1="100.0" y1="106.0" x2="260.0" y2="106.0" class="edge" data-a="" style="animation-name:w58-65-160-70;stroke-dasharray:162 162" opacity="0"/><g data-a="" style="animation-name:v72-100" opacity="1"><g class="ply"><polygon points="246.0,206.0 260.0,206.0 260.0,186.0 246.0,186.0" class="front"/><polygon points="260.0,206.0 266.3,202.1 266.3,182.1 260.0,186.0" class="side"/></g><g class="oak"><polygon points="246.0,186.0 260.0,186.0 260.0,166.0 246.0,166.0" class="front"/><polygon points="260.0,186.0 266.3,182.1 266.3,162.1 260.0,166.0" class="side"/></g><g class="ply"><polygon points="246.0,166.0 260.0,166.0 260.0,146.0 246.0,146.0" class="front"/><polygon points="260.0,166.0 266.3,162.1 266.3,142.1 260.0,146.0" class="side"/></g><g class="oak"><polygon points="246.0,146.0 260.0,146.0 260.0,126.0 246.0,126.0" class="front"/><polygon points="260.0,146.0 266.3,142.1 266.3,122.1 260.0,126.0" class="side"/></g><g class="ply"><polygon points="246.0,126.0 260.0,126.0 260.0,106.0 246.0,106.0" class="front"/><polygon points="260.0,126.0 266.3,122.1 266.3,102.1 260.0,106.0" class="side"/></g><g class="maple"><polygon points="246.0,106.0 260.0,106.0 270.8,99.3 256.8,99.3" class="top"/><polygon points="260.0,120.0 270.8,113.3 270.8,99.3 260.0,106.0" class="side"/></g><g class="oak"><polygon points="256.8,99.3 270.8,99.3 281.6,92.6 267.6,92.6" class="top"/><polygon points="270.8,113.3 281.6,106.6 281.6,92.6 270.8,99.3" class="side"/></g><g class="maple"><polygon points="267.6,92.6 281.6,92.6 292.4,85.8 278.4,85.8" class="top"/><polygon points="281.6,106.6 292.4,99.8 292.4,85.8 281.6,92.6" class="side"/></g><g class="oak"><polygon points="278.4,85.8 292.4,85.8 303.2,79.1 289.2,79.1" class="top"/><polygon points="292.4,99.8 303.2,93.1 303.2,79.1 292.4,85.8" class="side"/></g><g class="maple"><polygon points="289.2,79.1 303.2,79.1 314.0,72.4 300.0,72.4" class="top"/><polygon points="303.2,93.1 314.0,86.4 314.0,72.4 303.2,79.1" class="side"/></g><g class="maple"><polygon points="100.0,106.0 132.0,106.0 138.3,102.1 106.3,102.1" class="top"/><polygon points="100.0,120.0 132.0,120.0 132.0,106.0 100.0,106.0" class="front"/></g><g class="ply"><polygon points="132.0,106.0 164.0,106.0 170.3,102.1 138.3,102.1" class="top"/><polygon points="132.0,120.0 164.0,120.0 164.0,106.0 132.0,106.0" class="front"/></g><g class="maple"><polygon points="164.0,106.0 196.0,106.0 202.3,102.1 170.3,102.1" class="top"/><polygon points="164.0,120.0 196.0,120.0 196.0,106.0 164.0,106.0" class="front"/></g><g class="ply"><polygon points="196.0,106.0 228.0,106.0 234.3,102.1 202.3,102.1" class="top"/><polygon points="196.0,120.0 228.0,120.0 228.0,106.0 196.0,106.0" class="front"/></g><g class="maple"><polygon points="228.0,106.0 260.0,106.0 266.3,102.1 234.3,102.1" class="top"/><polygon points="228.0,120.0 260.0,120.0 260.0,106.0 228.0,106.0" class="front"/></g></g><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-10" opacity="0">Three sets of panels: X, Y and Z (by the direction they face).</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v10-30" opacity="0">Pass 1: Z is hidden. Draw the edge where X meets Y.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v30-50" opacity="0">Pass 2: Y is hidden. Draw the edge where X meets Z.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v50-70" opacity="0">Pass 3: X is hidden. Draw the edge where Y meets Z.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v70-100" opacity="1">All cuts are applied at once: a finger-jointed box.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>three passes, then one subtraction</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>Sort your panels mentally into three sets by the direction they face: X (their faces point along the X axis), Y and Z. Sides of a box are X and Y; top and bottom are Z.</li>
+    <li>All panels are polysurfaces and every pair of sets overlaps where they meet.</li>
+    <li>The same subdivision count is used for all three edges. If your box is not a cube, finger widths will differ per edge.</li>
+  </ul>
+
+  <h2>Steps</h2>
+  <ol class="steps">
+    <li>Run <code>finger3</code>. <span class="prompt">select X objects</span>, then <span class="prompt">select Y objects</span>, then <span class="prompt">select Z objects</span>. <kbd>Enter</kbd> after each set.</li>
+    <li><span class="prompt">enter subdivisions (o)</span> Number of fingers per edge (default 5). Odd is best.</li>
+    <li><strong>Pass 1.</strong> The Z set disappears. <span class="prompt">select start of intersection</span> / <span class="prompt">end</span>: click along a vertical edge where an X panel meets a Y panel.</li>
+    <li><strong>Pass 2.</strong> Z is back, Y is hidden. Click along an edge where an X panel meets a Z panel.</li>
+    <li><strong>Pass 3.</strong> X is hidden. Click along an edge where a Y panel meets a Z panel.</li>
+    <li>Everything reappears and all the pieces are subtracted in one go.</li>
+  </ol>
+
+  <h2>Prompts</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Prompt</th><th>Expected input</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="k">select X objects</td><td>Polysurfaces</td><td>Panels whose faces point along X.</td></tr>
+      <tr><td class="k">select Y objects</td><td>Polysurfaces</td><td>Panels whose faces point along Y.</td></tr>
+      <tr><td class="k">select Z objects</td><td>Polysurfaces</td><td>Panels whose faces point along Z (top, bottom, shelves).</td></tr>
+      <tr><td class="k">enter subdivisions (o)</td><td>Integer ≥ 2</td><td>Default 5, used for all three passes. The "(o)" means odd.</td></tr>
+      <tr><td class="k">select start / end of intersection</td><td>Two points, three times</td><td>Pass 1: X∩Y edge. Pass 2: X∩Z edge. Pass 3: Y∩Z edge.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Which part keeps which finger</h2>
+  <p>The passes run as (X, Y), (X, Z), (Y, Z). In each pass the first-named set plays "plane 1" and loses the even-numbered pieces. So X panels get notched at both ends of their joints with Y and Z, and Y panels get notched at the ends of their joints with Z. If a corner comes out the other way from what you wanted, swap which set you call X and which Y.</p>
+
+  <h2>Tips and gotchas</h2>
+  <ul>
+    <li>Only three edges to draw, not twelve: one edge per pair of sets is enough because every overlapping pair in those sets is handled along the same direction.</li>
+    <li>Draw each edge the full length of the box in that direction; fingers exist only along the line.</li>
+    <li>The hiding is only there to help you click. It is undone before the booleans run.</li>
+    <li>All the caveats of <a class="cmd" href="#finger2">finger2</a> apply: 100-unit cylinder radius, no kerf, zero clearance.</li>
+  </ul>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#finger2"><span class="t"><svg><use href="#i-finger2"/></svg>finger2</span><span class="d">The single-joint version and the details of the algorithm.</span></a>
+    <a class="card" href="#mortisetenon"><span class="t"><svg><use href="#i-mortise"/></svg>mortisetenon</span><span class="d">Shelves and dividers inside the box.</span></a>
+    <a class="card" href="#workflow"><span class="t"><svg><use href="#i-flow"/></svg>Workflow</span><span class="d">Where this sits in the process.</span></a>
+  </div>
+  <p class="src">Source: <a href="https://github.com/notkoosh/rhinotools/blob/master/fingerjoint/xyz.py" target="_blank" rel="noopener">fingerjoint/xyz.py</a>.</p>
+</article>
+
+<!-- ======================================================= MORTISE TENON -->
+<article class="page" id="page-mortisetenon" data-title="mortisetenon" data-crumb="Joinery">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Joinery</span><span>mortisetenon</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-mortise"/></svg></div><div><h1>mortisetenon</h1><p class="lede">Grow tenons from a face of one part and cut matching mortises through another.</p>
+    <div class="chips"><span class="chip"><b>alias</b> mt <span class="muted">(suggested)</span></span><span class="chip"><b>script</b> mortisetenon.py</span><span class="badge exp">undocumented in README</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>Draw rectangles on the end of a board where you want pegs. Point at how far the pegs should stick out. The tool pushes the rectangles out into pegs, glues them onto the board, and punches the same shapes through the other part so the pegs have holes to go into.</p>
+  </div>
+
+  <div class="anim" style="--dur:14s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><g class="ply"><polygon points="170.0,212.0 210.0,212.0 210.0,142.0 170.0,142.0" class="front"/><polygon points="210.0,212.0 264.0,178.4 264.0,108.4 210.0,142.0" class="side"/><polygon points="170.0,142.0 210.0,142.0 264.0,108.4 224.0,108.4" class="top"/></g><text x="164.0" y="182.0" class="lbl" data-a="" style="animation-name:v0-70" opacity="0">positive</text><g data-a="" style="animation-name:v50-100" opacity="1"><g class="ply"><polygon points="182.3,138.1 210.3,138.1 210.3,102.1 182.3,102.1" class="front"/><polygon points="210.3,138.1 223.8,129.7 223.8,93.7 210.3,102.1" class="side"/><polygon points="182.3,102.1 210.3,102.1 223.8,93.7 195.8,93.7" class="top"/></g><g class="ply"><polygon points="210.2,120.7 238.2,120.7 238.2,84.7 210.2,84.7" class="front"/><polygon points="238.2,120.7 251.7,112.3 251.7,76.3 238.2,84.7" class="side"/><polygon points="210.2,84.7 238.2,84.7 251.7,76.3 223.7,76.3" class="top"/></g></g><g class="a" style="animation-name:negj" opacity="0"><g class="oak"><polygon points="110.0,120.0 270.0,120.0 270.0,106.0 110.0,106.0" class="front"/><polygon points="270.0,120.0 324.0,86.4 324.0,72.4 270.0,106.0" class="side"/><polygon points="110.0,106.0 270.0,106.0 324.0,72.4 164.0,72.4" class="top"/></g><g data-a="" style="animation-name:v50-70" opacity="0"><g class="ply"><polygon points="182.3,102.1 210.3,102.1 223.8,93.7 195.8,93.7" class="top"/><polygon points="210.2,84.7 238.2,84.7 251.7,76.3 223.7,76.3" class="top"/></g></g></g><text x="104.0" y="116.0" class="lbl" data-a="" style="animation-name:v0-70" opacity="0">negative</text><polygon points="170.0,142.0 210.0,142.0 264.0,108.4 224.0,108.4" class="hl" data-a="" style="animation-name:v10-22" opacity="0"/><circle cx="217.0" cy="125.2" r="4" class="click" data-a="" style="animation-name:v12-22" opacity="0"/><circle cx="217.0" cy="125.2" r="14" class="click-ring a" style="animation-name:r12;transform-origin:217.0px 125.2px" opacity="0"/><g data-a="" style="animation-name:v22-50" opacity="0"><g transform="matrix(1 0 0.45 -0.28 110.0 142.0)"><rect x="66" y="14" width="28" height="30" class="curve"/><rect x="66" y="76" width="28" height="30" class="curve"/></g></g><line x1="277.0" y1="125.2" x2="277.0" y2="89.2" class="measure" data-a="" style="animation-name:v38-70" opacity="0"/><circle cx="277.0" cy="89.2" r="4" class="click" data-a="" style="animation-name:v38-70" opacity="0"/><circle cx="277.0" cy="89.2" r="14" class="click-ring a" style="animation-name:r38;transform-origin:277.0px 89.2px" opacity="0"/><text x="283.0" y="103.2" class="lbl" data-a="" style="animation-name:v38-70" opacity="0">height</text><g data-a="" style="animation-name:v70-100" opacity="1"><g class="a lift" style="animation-name:lift50"><g class="oak"><polygon points="110.0,120.0 270.0,120.0 270.0,106.0 110.0,106.0" class="front"/><polygon points="270.0,120.0 324.0,86.4 324.0,72.4 270.0,106.0" class="side"/><polygon points="110.0,106.0 270.0,106.0 324.0,72.4 164.0,72.4" class="top"/></g><clipPath id="clip6"><polygon points="182.3,102.1 210.3,102.1 223.8,93.7 195.8,93.7" class="void"/></clipPath><polygon points="182.3,102.1 210.3,102.1 223.8,93.7 195.8,93.7" class="void"/><g clip-path="url(#clip6)"><g class="oak"><polygon points="182.3,116.1 195.8,107.7 195.8,93.7 182.3,102.1" class="side"/><polygon points="195.8,107.7 223.8,107.7 223.8,93.7 195.8,93.7" class="front"/></g></g><clipPath id="clip7"><polygon points="210.2,84.7 238.2,84.7 251.7,76.3 223.7,76.3" class="void"/></clipPath><polygon points="210.2,84.7 238.2,84.7 251.7,76.3 223.7,76.3" class="void"/><g clip-path="url(#clip7)"><g class="oak"><polygon points="210.2,98.7 223.7,90.3 223.7,76.3 210.2,84.7" class="side"/><polygon points="223.7,90.3 251.7,90.3 251.7,76.3 223.7,76.3" class="front"/></g></g></g></g><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-10" opacity="0">Select the positive part, then the negative part.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v10-22" opacity="0">The negative is hidden. Click the face the tenons grow from.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v22-38" opacity="0">Select the tenon curves you drew on that face beforehand.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v38-50" opacity="0">Click a height point: tenons reach that far from the face.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v50-70" opacity="0">Tenons are extruded, fused into the positive, cut from the negative.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v70-100" opacity="1">Result: one part with tenons, one with matching mortises.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>two through-tenons from an upright into a shelf</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>The <strong>positive</strong> part gets the tenons. The <strong>negative</strong> part gets the mortises. Both are polysurfaces.</li>
+    <li>Draw the tenon outlines as closed curves (rectangles, usually) lying on the positive part's face <em>before</em> running the tool. Rhino cannot draw while a script is waiting for a selection.</li>
+    <li>Decide how long the tenons are: for through-tenons, the far face of the negative part; for blind tenons, any point at the right depth.</li>
+  </ul>
+
+  <h2>Steps</h2>
+  <ol class="steps">
+    <li>Run the alias. <span class="prompt">select positive object</span> Pick the part that gets the tenons.</li>
+    <li><span class="prompt">select negative object</span> Pick the part that gets the mortises. It is hidden for the next two prompts so it cannot get in the way.</li>
+    <li><span class="prompt">select tenon surface</span> Click the face of the positive part the tenons grow from. This uses <a href="#getsubsurface">getsubsurface</a>, so click the face itself. The construction plane snaps to that face.</li>
+    <li><span class="prompt">select tenon curves</span> Select the closed curves you drew on that face, then <kbd>Enter</kbd>. The negative part reappears.</li>
+    <li><span class="prompt">enter height point</span> Click a point. Its distance from the face plane is the tenon length. Snap to the far face of the negative part for a through-tenon.</li>
+    <li>The tenons are extruded, unioned into the positive, and subtracted from the negative. Original objects are replaced.</li>
+  </ol>
+
+  <h2>Prompts</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Prompt</th><th>Expected input</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="k">select positive object</td><td>One polysurface</td><td>Receives the tenons.</td></tr>
+      <tr><td class="k">select negative object</td><td>One polysurface</td><td>Receives the mortises. Hidden until the curves are picked.</td></tr>
+      <tr><td class="k">select tenon surface</td><td>One face of the positive part</td><td>Sets the CPlane and the extrusion direction (the face normal).</td></tr>
+      <tr><td class="k">select tenon curves</td><td>Closed planar curves</td><td>Each becomes one tenon. Project osnaps are turned on so points land on the face plane.</td></tr>
+      <tr><td class="k">enter height point</td><td>Point</td><td>Only its distance from the face plane matters, measured along the normal.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>How it works</h2>
+  <ul>
+    <li>The clicked face gives a plane and its normal. Each curve is turned into a planar surface and extruded along the normal by the height point's distance to the plane.</li>
+    <li><code>BooleanUnion(positive + tenons)</code> builds the new positive; <code>BooleanDifference(negative, tenons)</code> builds the new negative. Both are created as new objects and the inputs are deleted.</li>
+  </ul>
+
+  <h2>Tips and gotchas</h2>
+  <ul>
+    <li><strong>Zero clearance.</strong> The mortise is exactly the tenon. For a tight friction fit that is what you want; for a slip fit, offset the curves outward before cutting the negative, or rely on the laser kerf.</li>
+    <li><strong>Router users: dogbone the mortises.</strong> A rectangular mortise has four inside corners. Run <a class="cmd" href="#dogbone">dogbone</a> on the negative part's face afterwards.</li>
+    <li>The tenon curves must lie on the face (or be projectable onto it); a curve floating above the face still extrudes, but from where it is.</li>
+    <li>If the union fails, the tenon probably sits flush inside the positive part rather than protruding; check the height point was on the far side of the face.</li>
+  </ul>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#dogbone"><span class="t"><svg><use href="#i-dogbone"/></svg>dogbone</span><span class="d">Relieve the mortise corners for a router.</span></a>
+    <a class="card" href="#finger3"><span class="t"><svg><use href="#i-finger3"/></svg>finger3</span><span class="d">Joinery for the box itself.</span></a>
+    <a class="card" href="#getsubsurface"><span class="t"><svg><use href="#i-sub"/></svg>getsubsurface</span><span class="d">How the face pick works.</span></a>
+  </div>
+  <p class="src">Source: <a href="https://github.com/notkoosh/rhinotools/blob/master/mortisetenon.py" target="_blank" rel="noopener">mortisetenon.py</a>.</p>
+</article>
+
+<!-- ======================================================= WHY DOGBONES -->
+<article class="page" id="page-dogbones" data-title="Why dogbones?" data-crumb="Relief cuts">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Relief cuts</span><span>Why dogbones?</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-concept"/></svg></div><div><h1>Why dogbones?</h1><p class="lede">A router bit is round. Inside corners are not. Something has to give.</p><div class="chips"><span class="badge concept">concept</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>Try to colour the corner of a square with a round crayon tip without going outside the lines. You can't; the corner stays white. A router bit is a spinning round crayon, so every inside corner it cuts stays slightly round, and the square tab that is supposed to fit there jams. A dogbone is a deliberate extra bite at the corner, placed so the round bit can go past the corner and clear it.</p>
+  </div>
+
+  <div class="anim" style="--dur:14s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><rect x="20" y="18" width="400" height="208" class="ply2d"/><rect x="120" y="82" width="200" height="80" rx="16" class="void"/><rect x="120" y="82" width="200" height="80" class="ideal"/><g class="a" style="animation-name:travel"><circle r="16" class="cutter a" style="animation-name:cutvis" opacity="0"/><line x1="-16" y1="0" x2="16" y2="0" class="cross a" style="animation-name:cutvis" opacity="0"/><line x1="0" y1="-16" x2="0" y2="16" class="cross a" style="animation-name:cutvis" opacity="0"/></g><text x="330.0" y="60.0" class="lbl start" data-a="" style="animation-name:v0-40" opacity="0">endmill, radius r</text><g data-a="" style="animation-name:v40-60" opacity="0"><circle cx="120" cy="82" r="7" class="bad"/><circle cx="320" cy="82" r="7" class="bad"/><circle cx="320" cy="162" r="7" class="bad"/><circle cx="120" cy="162" r="7" class="bad"/></g><text x="220.0" y="60.0" class="lbl mid bad-txt" data-a="" style="animation-name:v40-60" opacity="0">the cutter can never reach a sharp inside corner</text><g data-a="" style="animation-name:v60-100" opacity="1"><circle cx="108.7" cy="70.7" r="16" class="void"/><line x1="120" y1="82" x2="97.4" y2="59.4" class="diag"/><circle cx="331.3" cy="70.7" r="16" class="void"/><line x1="320" y1="82" x2="342.6" y2="59.4" class="diag"/><circle cx="331.3" cy="173.3" r="16" class="void"/><line x1="320" y1="162" x2="342.6" y2="184.6" class="diag"/><circle cx="108.7" cy="173.3" r="16" class="void"/><line x1="120" y1="162" x2="97.4" y2="184.6" class="diag"/></g><text x="220.0" y="60.0" class="lbl mid" data-a="" style="animation-name:v60-78" opacity="0">dogbone: a cutter-sized circle on the 45° diagonal, through the corner</text><rect x="120" y="82" width="200" height="80" class="tab" data-a="" style="animation-name:v78-100" opacity="1"/><text x="220.0" y="60.0" class="lbl mid" data-a="" style="animation-name:v78-100" opacity="1">a square tab now seats fully</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-40" opacity="0">A router bit has a radius, so it leaves every inside corner rounded.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v40-60" opacity="0">A square tab or shelf will not fit into a rounded slot.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v60-78" opacity="0">Relieve each corner so the sharp corner itself gets cleared.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v78-100" opacity="1">The relief is hidden inside the joint once assembled.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>a slot, a round cutter, and the fix</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <h2>What these tools build</h2>
+  <p>All three dogbone tools place the same shape at each corner you pick: a circle whose diameter is the cutter diameter plus ten percent, centred on the 45° diagonal of the corner, offset into the material by its own radius. The circle therefore passes exactly through the original corner point, and a cutter following the new outline reaches the corner. The ten percent is clearance for cutter runout and material fuzz.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Tool</th><th>Works on</th><th>Corner picking</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td><a class="cmd" href="#dogbone">dogbone</a></td><td>A face of a 3D extrusion</td><td>Click corners, or Esc for auto-detect</td><td>Cylinders subtracted through the solid</td></tr>
+      <tr><td><a class="cmd" href="#innerhole">innerhole</a></td><td>A closed polyline that is a hole</td><td>Click corners</td><td>Circles unioned into the curve (hole grows)</td></tr>
+      <tr><td><a class="cmd" href="#outerhole">outerhole</a></td><td>A closed polyline that is an outer profile</td><td>Click corners</td><td>Circles subtracted from the curve (notches grow)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>When you do not need them</h2>
+  <ul>
+    <li><strong>Laser cutting.</strong> A laser kerf is a fraction of a millimetre and the corner comes out sharp. Skip dogbones.</li>
+    <li><strong>Outside corners.</strong> A round cutter goes around an outside (convex) corner perfectly well. Only inside (concave) corners need relief.</li>
+    <li><strong>Corners nothing fits into.</strong> If no mating part has to seat in the corner, a small radius is harmless.</li>
+  </ul>
+
+  <h2>Further reading</h2>
+  <p>The README points to an explanation of slotted construction and relief cuts at <a href="http://www.kontraptionist.com/post/45218053861/slotted-construction-its-a-pretty-nice-thing-to" target="_blank" rel="noopener">kontraptionist.com</a>.</p>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#dogbone"><span class="t"><svg><use href="#i-dogbone"/></svg>dogbone</span><span class="d">3D solids.</span></a>
+    <a class="card" href="#innerhole"><span class="t"><svg><use href="#i-innerhole"/></svg>innerhole</span><span class="d">2D hole curves.</span></a>
+    <a class="card" href="#outerhole"><span class="t"><svg><use href="#i-outerhole"/></svg>outerhole</span><span class="d">2D outer profiles.</span></a>
+  </div>
+</article>
+
+<!-- ======================================================= DOGBONE -->
+<article class="page" id="page-dogbone" data-title="dogbone" data-crumb="Relief cuts">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Relief cuts</span><span>dogbone</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-dogbone"/></svg></div><div><h1>dogbone</h1><p class="lede">Cut dogbone relief into the inside corners of a planar face of a solid.</p>
+    <div class="chips"><span class="chip"><b>alias</b> dogbone</span><span class="chip"><b>script</b> dogbone.py</span><span class="badge stable">documented</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>Click the face of the panel the router will cut from. Tell the tool how fat the bit is. Click the inside corners. It drills a bit-sized hole diagonally into each corner, right through the panel, so the bit can reach. It also leaves a tiny marker where each corner used to be, in case you need it later.</p>
+  </div>
+
+  <div class="anim" style="--dur:14s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><g class="ply"><polygon points="95.0,200.0 275.0,200.0 275.0,188.0 95.0,188.0" class="front"/><polygon points="275.0,200.0 329.0,166.4 329.0,154.4 275.0,188.0" class="side"/><polygon points="95.0,188.0 275.0,188.0 329.0,154.4 149.0,154.4" class="top"/></g><clipPath id="clip8"><polygon points="165.8,178.2 235.8,178.2 258.2,164.2 188.2,164.2" class="void"/></clipPath><polygon points="165.8,178.2 235.8,178.2 258.2,164.2 188.2,164.2" class="void"/><g clip-path="url(#clip8)"><g class="ply"><polygon points="165.8,190.2 188.2,176.2 188.2,164.2 165.8,178.2" class="side"/><polygon points="188.2,176.2 258.2,176.2 258.2,164.2 188.2,164.2" class="front"/></g></g><polygon points="95.0,188.0 275.0,188.0 329.0,154.4 149.0,154.4" class="hl" data-a="" style="animation-name:v12-24" opacity="0"/><circle cx="290.0" cy="160.0" r="4" class="click" data-a="" style="animation-name:v14-24" opacity="0"/><circle cx="290.0" cy="160.0" r="14" class="click-ring a" style="animation-name:r14;transform-origin:290.0px 160.0px" opacity="0"/><g data-a="" style="animation-name:v24-36" opacity="0"><rect x="250" y="40" width="172" height="40" rx="3" class="prompt-box"/><text x="260" y="56" class="prompt-txt">enter cutter diameter 0.25</text><text x="260" y="72" class="prompt-txt dimmed">(used as 0.275: +10 %)</text></g><circle cx="165.8" cy="178.2" r="4" class="click" data-a="" style="animation-name:v38-70" opacity="0"/><circle cx="165.8" cy="178.2" r="14" class="click-ring a" style="animation-name:r38;transform-origin:165.8px 178.2px" opacity="0"/><circle cx="165.8" cy="178.2" r="3" class="redpt" data-a="" style="animation-name:v38-70" opacity="0"/><circle cx="235.8" cy="178.2" r="4" class="click" data-a="" style="animation-name:v41-70" opacity="0"/><circle cx="235.8" cy="178.2" r="14" class="click-ring a" style="animation-name:r41;transform-origin:235.8px 178.2px" opacity="0"/><circle cx="235.8" cy="178.2" r="3" class="redpt" data-a="" style="animation-name:v41-70" opacity="0"/><circle cx="258.2" cy="164.2" r="4" class="click" data-a="" style="animation-name:v44-70" opacity="0"/><circle cx="258.2" cy="164.2" r="14" class="click-ring a" style="animation-name:r44;transform-origin:258.2px 164.2px" opacity="0"/><circle cx="258.2" cy="164.2" r="3" class="redpt" data-a="" style="animation-name:v44-70" opacity="0"/><circle cx="188.2" cy="164.2" r="4" class="click" data-a="" style="animation-name:v47-70" opacity="0"/><circle cx="188.2" cy="164.2" r="14" class="click-ring a" style="animation-name:r47;transform-origin:188.2px 164.2px" opacity="0"/><circle cx="188.2" cy="164.2" r="3" class="redpt" data-a="" style="animation-name:v47-70" opacity="0"/><g data-a="" style="animation-name:v52-70" opacity="0"><g transform="matrix(1 0 0.45 -0.28 95.0 210.0)"><circle cx="50.1" cy="30.1" r="7" class="cut"/></g><rect x="150.9" y="165.6" width="15.4" height="36.0" class="cut"/><g transform="matrix(1 0 0.45 -0.28 95.0 174.0)"><circle cx="50.1" cy="30.1" r="7" class="cut top"/></g><g transform="matrix(1 0 0.45 -0.28 95.0 210.0)"><circle cx="129.9" cy="30.1" r="7" class="cut"/></g><rect x="230.8" y="165.6" width="15.4" height="36.0" class="cut"/><g transform="matrix(1 0 0.45 -0.28 95.0 174.0)"><circle cx="129.9" cy="30.1" r="7" class="cut top"/></g><g transform="matrix(1 0 0.45 -0.28 95.0 210.0)"><circle cx="129.9" cy="89.9" r="7" class="cut"/></g><rect x="257.8" y="148.8" width="15.4" height="36.0" class="cut"/><g transform="matrix(1 0 0.45 -0.28 95.0 174.0)"><circle cx="129.9" cy="89.9" r="7" class="cut top"/></g><g transform="matrix(1 0 0.45 -0.28 95.0 210.0)"><circle cx="50.1" cy="89.9" r="7" class="cut"/></g><rect x="177.9" y="148.8" width="15.4" height="36.0" class="cut"/><g transform="matrix(1 0 0.45 -0.28 95.0 174.0)"><circle cx="50.1" cy="89.9" r="7" class="cut top"/></g></g><g data-a="" style="animation-name:v70-100" opacity="1"><g transform="matrix(1 0 0.45 -0.28 95.0 188.0)"><circle cx="50.1" cy="30.1" r="7" class="void"/><circle cx="129.9" cy="30.1" r="7" class="void"/><circle cx="129.9" cy="89.9" r="7" class="void"/><circle cx="50.1" cy="89.9" r="7" class="void"/><circle cx="55" cy="35" r="1.6" class="refpt"/><circle cx="125" cy="35" r="1.6" class="refpt"/><circle cx="125" cy="85" r="1.6" class="refpt"/><circle cx="55" cy="85" r="1.6" class="refpt"/></g></g><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-12" opacity="0">An extrusion with a slot or pocket that a router will cut.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v12-24" opacity="0">Click the planar face the cutter enters from.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v24-36" opacity="0">Enter the cutter diameter. The tool adds 10 % for clearance.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v36-52" opacity="0">Click each inside corner. Esc with none picked = auto-detect.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v52-70" opacity="0">A cylinder is placed on each corner's 45° diagonal, through the part.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v70-100" opacity="1">Boolean difference leaves dogbones. Reference points mark the old corners.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>a slot through a panel, four corners</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>The part is a closed polysurface with a planar face that contains the corners: the face the cutter enters from.</li>
+    <li>Know your cutter diameter in model units. The default offered is 0.25 (a quarter-inch bit).</li>
+    <li>The panel must be less than 10 units thick, or edit the cylinder height first. See <a href="#install">units</a>.</li>
+  </ul>
+
+  <h2>Steps</h2>
+  <ol class="steps">
+    <li>Run <code>dogbone</code>. <span class="prompt">select dogbone face</span> Click the planar face. If a plain click grabs the whole solid, use sub-object selection (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+click on Windows, <kbd>⌘</kbd>+<kbd>Shift</kbd>+click on Mac).</li>
+    <li><span class="prompt">enter cutter diameter</span> Type the bit diameter. The tool multiplies it by 1.1.</li>
+    <li>The construction plane aligns to the face and project osnaps turn on. <span class="prompt">select corner</span> Click each inside corner you want relieved; a red dot confirms each pick. Points that are not a corner of the face's outline are rejected with "invalid curve point".</li>
+    <li>Press <kbd>Esc</kbd> (or <kbd>Enter</kbd>) to finish picking. If you picked <em>nothing</em>, the tool auto-detects corners that turn one way around each outline and dogbones all of them.</li>
+    <li>Cylinders are placed and subtracted. The original part is replaced by the result; previously hidden objects are re-hidden; a point object marks each original corner on the <code>dogbone-ref</code> layer.</li>
+  </ol>
+
+  <h2>Prompts</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Prompt</th><th>Expected input</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="k">select dogbone face</td><td>One planar face of a polysurface</td><td>Via <a href="#getsubsurface">getsubsurface</a>. Its outer border and any inner borders (holes) become the candidate outlines.</td></tr>
+      <tr><td class="k">enter cutter diameter</td><td>Number, default 0.25</td><td>Used as 1.1 × diameter.</td></tr>
+      <tr><td class="k">select corner</td><td>Points, repeated; Esc to stop</td><td>Must coincide (to 4 decimals) with a vertex of a border curve. Use End or Point osnap.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>How it works</h2>
+  <ul>
+    <li>The face is duplicated as a standalone surface; its outer and inner borders are duplicated as polylines and their vertices cached.</li>
+    <li>For every picked vertex the script measures the corner angle, finds the bisector pointing into the material, and places a circle of radius ½ × 1.1 × diameter at ½ × 1.1 × diameter from the corner along that bisector. The circle passes through the corner.</li>
+    <li>Each circle is extruded from 10 units below the face to 10 units above, in the face's construction plane, and all the cylinders are subtracted from the part in one <code>BooleanDifference</code>.</li>
+    <li>Auto-detect uses the sign of the turn at each vertex (the z component of the cross product of the two edges). Which sign means "inside corner" depends on the direction the border curve runs, which is why it sometimes picks the wrong corners.</li>
+  </ul>
+
+  <h2>Tips and gotchas</h2>
+  <ul>
+    <li><strong>Auto-detect picked the wrong corners?</strong> Undo and run again clicking the face from the other side of the panel, or just click the corners you want. <span class="fixme">FIXME</span></li>
+    <li><strong>Circles landed on the wrong side of a corner?</strong> The handedness guess failed for that outline. Undo, and try selecting the opposite face. <span class="fixme">FIXME</span></li>
+    <li><strong>Nothing happened?</strong> Check that your picks snapped to actual vertices; the command line prints <code>invalid curve point</code> for misses.</li>
+    <li>The <code>dogbone-ref</code> points are handy for dimensioning the original corner later. Delete the layer if you do not want them.</li>
+    <li>Finger-joint notches, mortises and slots all have inside corners. Run this on every face a mating part seats into.</li>
+  </ul>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#dogbones"><span class="t"><svg><use href="#i-concept"/></svg>Why dogbones?</span><span class="d">The geometry behind the circle placement.</span></a>
+    <a class="card" href="#innerhole"><span class="t"><svg><use href="#i-innerhole"/></svg>innerhole</span><span class="d">Same idea on a 2D hole curve.</span></a>
+    <a class="card" href="#outerhole"><span class="t"><svg><use href="#i-outerhole"/></svg>outerhole</span><span class="d">Same idea on a 2D outer profile.</span></a>
+    <a class="card" href="#getsubsurface"><span class="t"><svg><use href="#i-sub"/></svg>getsubsurface</span><span class="d">The face pick.</span></a>
+  </div>
+  <p class="src">Source: <a href="https://github.com/notkoosh/rhinotools/blob/master/dogbone.py" target="_blank" rel="noopener">dogbone.py</a>.</p>
+</article>
+<!-- ======================================================= INNERHOLE -->
+<article class="page" id="page-innerhole" data-title="innerhole" data-crumb="Relief cuts">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Relief cuts</span><span>innerhole</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-innerhole"/></svg></div><div><h1>innerhole</h1><p class="lede">Add dogbone relief to the corners of a closed curve that represents a hole or pocket.</p>
+    <div class="chips"><span class="chip"><b>alias</b> innerhole</span><span class="chip"><b>script</b> innerhole.py</span><span class="badge stable">documented</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>You have the outline of a hole drawn as a shape. Click its corners. The tool adds a round bump at each corner, pointing away from the hole, and merges the bumps into the outline so the hole gets a little bigger exactly where the router bit needs room.</p>
+  </div>
+
+  <div class="anim" style="--dur:12s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><rect x="20" y="18" width="400" height="208" class="ply2d"/><rect x="140" y="72" width="160" height="100" class="void"/><rect x="140" y="72" width="160" height="100" class="poly"/><text x="220.0" y="128.0" class="lbl mid" data-a="" style="animation-name:v0-100" opacity="1">closed polyline (a hole)</text><circle cx="140.0" cy="72.0" r="4" class="click" data-a="" style="animation-name:v22-46" opacity="0"/><circle cx="140.0" cy="72.0" r="14" class="click-ring a" style="animation-name:r22;transform-origin:140.0px 72.0px" opacity="0"/><circle cx="300.0" cy="72.0" r="4" class="click" data-a="" style="animation-name:v28-46" opacity="0"/><circle cx="300.0" cy="72.0" r="14" class="click-ring a" style="animation-name:r28;transform-origin:300.0px 72.0px" opacity="0"/><circle cx="300.0" cy="172.0" r="4" class="click" data-a="" style="animation-name:v34-46" opacity="0"/><circle cx="300.0" cy="172.0" r="14" class="click-ring a" style="animation-name:r34;transform-origin:300.0px 172.0px" opacity="0"/><circle cx="140.0" cy="172.0" r="4" class="click" data-a="" style="animation-name:v40-46" opacity="0"/><circle cx="140.0" cy="172.0" r="14" class="click-ring a" style="animation-name:r40;transform-origin:140.0px 172.0px" opacity="0"/><g data-a="" style="animation-name:v46-100" opacity="1"><circle cx="131.5" cy="63.5" r="12" class="void"/><circle cx="131.5" cy="63.5" r="12" class="poly"/><circle cx="308.5" cy="63.5" r="12" class="void"/><circle cx="308.5" cy="63.5" r="12" class="poly"/><circle cx="308.5" cy="180.5" r="12" class="void"/><circle cx="308.5" cy="180.5" r="12" class="poly"/><circle cx="131.5" cy="180.5" r="12" class="void"/><circle cx="131.5" cy="180.5" r="12" class="poly"/></g><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-22" opacity="0">Pick a closed polyline: the inside profile of a hole or pocket.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v22-46" opacity="0">Snap to each corner you want relieved (End or Point osnap). Esc when done.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v46-70" opacity="0">Circles are placed on each corner's 45° diagonal, passing through the corner.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v70-100" opacity="1">CurveBooleanUnion merges hole and circles into one outline. The hole grows.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>a rectangular hole, four corners</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>The input is one closed <a class="term" href="#glossary" title="A curve made of straight segments. Its control points are its corners.">polyline</a>. The script reads the curve's control points as corners, so a smooth curve will not give sensible results.</li>
+    <li>Turn on the End or Point osnap: picks must land exactly on a vertex.</li>
+    <li>The curve should describe empty space (a hole, slot or pocket), with material around it.</li>
+  </ul>
+
+  <h2>Steps</h2>
+  <ol class="steps">
+    <li>Run <code>innerhole</code>. <span class="prompt">enter cutter diameter</span> Type the bit diameter (default 0.25). It is used as 1.1 × diameter.</li>
+    <li><span class="prompt">select object</span> Pick the closed polyline.</li>
+    <li><span class="prompt">select point</span> Click a corner. The command line prints <code>clicked index n</code> for a hit, <code>invalid point</code> for a miss. Repeat for every corner you want relieved.</li>
+    <li>Press <kbd>Esc</kbd> to finish. The circles are unioned with the curve and the inputs deleted, leaving one new closed curve.</li>
+  </ol>
+
+  <h2>Prompts</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Prompt</th><th>Expected input</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="k">enter cutter diameter</td><td>Number, default 0.25</td><td>Multiplied by 1.1.</td></tr>
+      <tr><td class="k">select object</td><td>One closed polyline</td><td>Curve filter only.</td></tr>
+      <tr><td class="k">select point</td><td>Vertices, repeated; Esc to stop</td><td>Exact match against the curve's control points.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>How it works</h2>
+  <ul>
+    <li>At each picked vertex, the angle between the two adjacent edges is halved to find the bisector; a circle of radius ½ × 1.1 × diameter is placed that far from the vertex along the bisector, so it passes through the vertex.</li>
+    <li><code>CurveBooleanUnion(circles + curve)</code> merges everything into one outline. Because the circles sit outside the hole, the hole grows at the corners.</li>
+  </ul>
+
+  <h2>Tips and gotchas</h2>
+  <ul>
+    <li><strong>Bumps pointing the wrong way?</strong> The bisector direction follows the curve's direction. Run Rhino's <code>Flip</code> on the curve and try again. <span class="fixme">FIXME</span></li>
+    <li>Picked the wrong corner? There is no undo inside the command; press <kbd>Esc</kbd>, undo, and start again.</li>
+    <li>Works on any closed polyline, not just rectangles: an L-shaped pocket is fine, just click the inside corners.</li>
+  </ul>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#outerhole"><span class="t"><svg><use href="#i-outerhole"/></svg>outerhole</span><span class="d">The same tool for outer profiles (subtracts instead of adds).</span></a>
+    <a class="card" href="#dogbone"><span class="t"><svg><use href="#i-dogbone"/></svg>dogbone</span><span class="d">Do it on the 3D solid instead.</span></a>
+    <a class="card" href="#dogbones"><span class="t"><svg><use href="#i-concept"/></svg>Why dogbones?</span><span class="d">The reasoning.</span></a>
+  </div>
+  <p class="src">Source: <a href="https://github.com/notkoosh/rhinotools/blob/master/innerhole.py" target="_blank" rel="noopener">innerhole.py</a>.</p>
+</article>
+
+<!-- ======================================================= OUTERHOLE -->
+<article class="page" id="page-outerhole" data-title="outerhole" data-crumb="Relief cuts">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Relief cuts</span><span>outerhole</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-outerhole"/></svg></div><div><h1>outerhole</h1><p class="lede">Add dogbone relief to the inside corners of a closed curve that represents a part's outer profile.</p>
+    <div class="chips"><span class="chip"><b>alias</b> outerhole</span><span class="chip"><b>script</b> outerhole.py</span><span class="badge stable">documented</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>This is the outline of the whole part, and it has notches in its edge where other parts slot in. Click the corners at the bottom of each notch. The tool bites a round chunk out of the outline at each one so the router bit can clear the corner.</p>
+  </div>
+
+  <div class="anim" style="--dur:12s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><path d="M60 60 H180 V130 H260 V60 H380 V200 H60 Z" class="ply2d"/><path d="M60 60 H180 V130 H260 V60 H380 V200 H60 Z" class="poly"/><text x="220.0" y="180.0" class="lbl mid" data-a="" style="animation-name:v0-100" opacity="1">closed polyline (outer profile with a notch)</text><circle cx="180.0" cy="130.0" r="4" class="click" data-a="" style="animation-name:v22-46" opacity="0"/><circle cx="180.0" cy="130.0" r="14" class="click-ring a" style="animation-name:r22;transform-origin:180.0px 130.0px" opacity="0"/><circle cx="260.0" cy="130.0" r="4" class="click" data-a="" style="animation-name:v30-46" opacity="0"/><circle cx="260.0" cy="130.0" r="14" class="click-ring a" style="animation-name:r30;transform-origin:260.0px 130.0px" opacity="0"/><g data-a="" style="animation-name:v46-100" opacity="1"><circle cx="171.5" cy="138.5" r="12" class="void"/><circle cx="171.5" cy="138.5" r="12" class="poly"/><circle cx="268.5" cy="138.5" r="12" class="void"/><circle cx="268.5" cy="138.5" r="12" class="poly"/></g><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-22" opacity="0">Pick a closed polyline: the outer profile of a part, here with a slot in its edge.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v22-46" opacity="0">Snap to each inside corner of the notch. Esc when done.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v46-70" opacity="0">Circles go on the 45° diagonal into the material, through the corner.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v70-100" opacity="1">CurveBooleanDifference bites each circle out of the profile.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>a part outline with one slot</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>The input is one closed polyline describing material, with notches or slots cut into its edge.</li>
+    <li>Only concave (inside) corners need relief. Convex corners of the outline do not; leave them alone.</li>
+    <li>Turn on the End or Point osnap.</li>
+  </ul>
+
+  <h2>Steps</h2>
+  <ol class="steps">
+    <li>Run <code>outerhole</code>. <span class="prompt">enter cutter diameter</span> Type the bit diameter (default 0.25). Used as 1.1 × diameter.</li>
+    <li><span class="prompt">select object</span> Pick the closed polyline.</li>
+    <li><span class="prompt">select point</span> Click each inside corner. <code>clicked index n</code> confirms a hit.</li>
+    <li>Press <kbd>Esc</kbd>. Each circle is subtracted from the profile in turn, replacing the curve.</li>
+  </ol>
+
+  <h2>Prompts</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Prompt</th><th>Expected input</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="k">enter cutter diameter</td><td>Number, default 0.25</td><td>Multiplied by 1.1.</td></tr>
+      <tr><td class="k">select object</td><td>One closed polyline</td><td>Curve filter only.</td></tr>
+      <tr><td class="k">select point</td><td>Vertices, repeated; Esc to stop</td><td>Exact match against control points.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>How it works</h2>
+  <p>Identical circle placement to <a class="cmd" href="#innerhole">innerhole</a>; the only difference is the last step, which uses <code>CurveBooleanDifference(profile, circle)</code> once per circle instead of a union. The material shrinks at each corner.</p>
+
+  <h2>Tips and gotchas</h2>
+  <ul>
+    <li><strong>Bites on the wrong side?</strong> <code>Flip</code> the curve and try again.</li>
+    <li>Because each circle is subtracted separately, the script leaves exactly one curve at the end, but intermediate curves are created and deleted; expect several Undo steps.</li>
+    <li>If a circle overlaps a convex corner of the outline it may cut into the part where you do not want it. Pick carefully with a large cutter.</li>
+  </ul>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#innerhole"><span class="t"><svg><use href="#i-innerhole"/></svg>innerhole</span><span class="d">For holes rather than outlines.</span></a>
+    <a class="card" href="#dogbone"><span class="t"><svg><use href="#i-dogbone"/></svg>dogbone</span><span class="d">The 3D version.</span></a>
+    <a class="card" href="#dogbones"><span class="t"><svg><use href="#i-concept"/></svg>Why dogbones?</span><span class="d">The reasoning.</span></a>
+  </div>
+  <p class="src">Source: <a href="https://github.com/notkoosh/rhinotools/blob/master/outerhole.py" target="_blank" rel="noopener">outerhole.py</a>.</p>
+</article>
+
+<!-- ======================================================= LAY -->
+<article class="page" id="page-lay" data-title="lay" data-crumb="Layout">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Layout</span><span>lay</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-lay"/></svg></div><div><h1>lay</h1><p class="lede">Lay panels flat on the Top construction plane, one click per part.</p>
+    <div class="chips"><span class="chip"><b>alias</b> lay</span><span class="chip"><b>script</b> laydown.py</span><span class="badge stable">documented</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>Your model is standing up like a finished box. The laser needs every panel lying flat on the floor. Click each panel on the side that should touch the floor, and a copy of it lies down. Keep clicking until you run out of panels.</p>
+  </div>
+
+  <div class="anim" style="--dur:10s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><g><line x1="50.0" y1="222.0" x2="122.0" y2="177.2" class="grid"/><line x1="80.0" y1="222.0" x2="152.0" y2="177.2" class="grid"/><line x1="110.0" y1="222.0" x2="182.0" y2="177.2" class="grid"/><line x1="140.0" y1="222.0" x2="212.0" y2="177.2" class="grid"/><line x1="170.0" y1="222.0" x2="242.0" y2="177.2" class="grid"/><line x1="200.0" y1="222.0" x2="272.0" y2="177.2" class="grid"/><line x1="230.0" y1="222.0" x2="302.0" y2="177.2" class="grid"/><line x1="260.0" y1="222.0" x2="332.0" y2="177.2" class="grid"/><line x1="290.0" y1="222.0" x2="362.0" y2="177.2" class="grid"/><line x1="320.0" y1="222.0" x2="392.0" y2="177.2" class="grid"/><line x1="350.0" y1="222.0" x2="422.0" y2="177.2" class="grid"/><line x1="50.0" y1="222.0" x2="350.0" y2="222.0" class="grid"/><line x1="64.4" y1="213.0" x2="364.4" y2="213.0" class="grid"/><line x1="78.8" y1="204.1" x2="378.8" y2="204.1" class="grid"/><line x1="93.2" y1="195.1" x2="393.2" y2="195.1" class="grid"/><line x1="107.6" y1="186.2" x2="407.6" y2="186.2" class="grid"/><line x1="122.0" y1="177.2" x2="422.0" y2="177.2" class="grid"/></g><text x="44.6" y="225.4" class="lbl start" data-a="" style="animation-name:v0-100" opacity="1">Top construction plane</text><g class="tilt a ghostly" style="animation-name:ghost;transform:rotate(-32deg) translate(-30px,-105px)" opacity=".35"><g class="ply"><polygon points="148.0,210.8 298.0,210.8 298.0,202.8 148.0,202.8" class="front"/><polygon points="298.0,210.8 338.5,185.6 338.5,177.6 298.0,202.8" class="side"/><polygon points="148.0,202.8 298.0,202.8 338.5,177.6 188.5,177.6" class="top"/></g></g><g class="tilt a" style="animation-name:laydown"><g class="ply"><polygon points="148.0,210.8 298.0,210.8 298.0,202.8 148.0,202.8" class="front"/><polygon points="298.0,210.8 338.5,185.6 338.5,177.6 298.0,202.8" class="side"/><polygon points="148.0,202.8 298.0,202.8 338.5,177.6 188.5,177.6" class="top"/></g></g><g class="tilt" style="transform:rotate(-32deg) translate(-30px,-105px)"><circle cx="238.2" cy="190.2" r="4" class="click" data-a="" style="animation-name:v22-36" opacity="0"/><circle cx="238.2" cy="190.2" r="14" class="click-ring a" style="animation-name:r22;transform-origin:238.2px 190.2px" opacity="0"/></g><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-22" opacity="0">A part sits at some angle in your model.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v22-38" opacity="0">Click the face that should end up on the Top plane (the 'down' face).</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v38-62" opacity="0">A copy is oriented so that face lies flat on Top.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v62-100" opacity="1">Copy goes on the 'laydown' layer; original is hidden. Esc when done.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>one panel laid onto Top</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <h2>Before you start</h2>
+  <ul>
+    <li>Parts are polysurfaces with a planar face to lie on (any flat panel qualifies).</li>
+    <li>Decide which face of each part is the "down" face. For parts with a good side, the down face is the one you want against the machine bed. Picking the other face mirrors the part.</li>
+  </ul>
+
+  <h2>Steps</h2>
+  <ol class="steps">
+    <li>Run <code>lay</code>. A layer named <code>laydown</code> is created if needed.</li>
+    <li><span class="prompt">select down face</span> Click the face of a part that should lie on the Top plane. A copy of the part is oriented so that face lies on Top, moved to the <code>laydown</code> layer, and the original is hidden.</li>
+    <li>Repeat for every part. Each original disappears as you go, so you can see what is left.</li>
+    <li>Press <kbd>Esc</kbd> when done. The command ends with an error message; this is expected and harmless. <span class="fixme">FIXME</span></li>
+    <li>Run <code>Show</code> to bring the originals back when you want them.</li>
+  </ol>
+
+  <h2>Prompts</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Prompt</th><th>Expected input</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="k">select down face</td><td>One face of a polysurface, repeated</td><td>Via <a href="#getsubsurface">getsubsurface</a>. Esc ends the loop (with the error noted above).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>How it works</h2>
+  <ul>
+    <li>The clicked face defines a plane; the view's construction plane is set to it and the part's bounding box is computed in that plane.</li>
+    <li>Three corners of that box are mapped to the face's own surface coordinates with z = 0, and <code>OrientObject</code> (copy mode) maps the part from the first three points to the second three. The result is the part lying on world XY.</li>
+  </ul>
+
+  <h2>Tips and gotchas</h2>
+  <ul>
+    <li><strong>Copies land near the origin and may overlap.</strong> Their position comes from the face's surface parameters, not from any nesting logic. Drag them apart or hand them to a nesting tool afterwards. The README recommends RhinoNest if you can afford it.</li>
+    <li><strong>Keep the Top viewport active</strong> or at least check the result in Top; the construction plane of the active view is changed during the command.</li>
+    <li>The copies are on their own layer so you can select them all at once for <code>Make2D</code> or export.</li>
+  </ul>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#workflow"><span class="t"><svg><use href="#i-flow"/></svg>Workflow</span><span class="d">What to do with the flat copies.</span></a>
+    <a class="card" href="#getsubsurface"><span class="t"><svg><use href="#i-sub"/></svg>getsubsurface</span><span class="d">The face pick and why Esc complains.</span></a>
+    <a class="card" href="#known-issues"><span class="t"><svg><use href="#i-bug"/></svg>Known issues</span><span class="d">The Esc error, explained.</span></a>
+  </div>
+  <p class="src">Source: <a href="https://github.com/notkoosh/rhinotools/blob/master/laydown.py" target="_blank" rel="noopener">laydown.py</a>.</p>
+</article>
+
+<!-- ======================================================= FACES -->
+<article class="page" id="page-faces" data-title="faces" data-crumb="Modeling">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Modeling</span><span>faces</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-faces"/></svg></div><div><h1>faces</h1><p class="lede">Thicken a shell of zero-thickness surfaces into solid panels, growing inward.</p>
+    <div class="chips"><span class="chip"><b>alias</b> faces <span class="muted">(suggested)</span></span><span class="chip"><b>script</b> faces.py</span><span class="badge exp">experimental</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>You drew a box out of paper-thin sheets. This turns each sheet into a real plank, a quarter of a unit thick, pushing the thickness toward the inside of the box so the outside dimensions stay the same.</p>
+  </div>
+
+  <div class="anim" style="--dur:10s"><svg viewBox="0 0 440 250" class="scene " role="img" aria-hidden="false"><defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arrhead"/></marker></defs><g data-a="" style="animation-name:v0-55" opacity="0"><polygon points="100.0,206.0 260.0,206.0 314.0,172.4 154.0,172.4" class="sheet"/><polygon points="154.0,172.4 314.0,172.4 314.0,82.4 154.0,82.4" class="sheet"/><polygon points="100.0,206.0 154.0,172.4 154.0,82.4 100.0,116.0" class="sheet"/><polygon points="260.0,206.0 314.0,172.4 314.0,82.4 260.0,116.0" class="sheet"/><polygon points="100.0,206.0 260.0,206.0 260.0,116.0 100.0,116.0" class="sheet"/></g><g data-a="" style="animation-name:v30-55" opacity="0"><circle cx="207.0" cy="144.2" r="3.5" class="pt"/><line x1="180.0" y1="161.0" x2="187.2" y2="156.5" class="arrow" marker-end="url(#arr)"/><line x1="287.0" y1="144.2" x2="271.0" y2="144.2" class="arrow" marker-end="url(#arr)"/><line x1="207.0" y1="189.2" x2="207.0" y2="173.2" class="arrow" marker-end="url(#arr)"/><line x1="234.0" y1="127.4" x2="226.8" y2="131.9" class="arrow" marker-end="url(#arr)"/><line x1="127.0" y1="144.2" x2="143.0" y2="144.2" class="arrow" marker-end="url(#arr)"/></g><text x="213.0" y="139.2" class="lbl" data-a="" style="animation-name:v30-55" opacity="0">center</text><g data-a="" style="animation-name:v55-100" opacity="1"><g class="ply"><polygon points="100.0,206.0 260.0,206.0 260.0,196.0 100.0,196.0" class="front"/><polygon points="260.0,206.0 314.0,172.4 314.0,162.4 260.0,196.0" class="side"/><polygon points="100.0,196.0 260.0,196.0 314.0,162.4 154.0,162.4" class="top"/></g><g class="ply"><polygon points="149.5,175.2 309.5,175.2 309.5,85.2 149.5,85.2" class="front"/><polygon points="309.5,175.2 314.0,172.4 314.0,82.4 309.5,85.2" class="side"/><polygon points="149.5,85.2 309.5,85.2 314.0,82.4 154.0,82.4" class="top"/></g><g class="ply"><polygon points="100.0,206.0 110.0,206.0 110.0,116.0 100.0,116.0" class="front"/><polygon points="110.0,206.0 164.0,172.4 164.0,82.4 110.0,116.0" class="side"/><polygon points="100.0,116.0 110.0,116.0 164.0,82.4 154.0,82.4" class="top"/></g><g class="ply"><polygon points="250.0,206.0 260.0,206.0 260.0,116.0 250.0,116.0" class="front"/><polygon points="260.0,206.0 314.0,172.4 314.0,82.4 260.0,116.0" class="side"/><polygon points="250.0,116.0 260.0,116.0 314.0,82.4 304.0,82.4" class="top"/></g><g class="ply"><polygon points="100.0,206.0 260.0,206.0 260.0,116.0 100.0,116.0" class="front"/><polygon points="260.0,206.0 264.5,203.2 264.5,113.2 260.0,116.0" class="side"/><polygon points="100.0,116.0 260.0,116.0 264.5,113.2 104.5,113.2" class="top"/></g></g><text x="220" y="242" class="cap" data-a="" style="animation-name:v0-30" opacity="0">Zero-thickness surfaces arranged as a shell.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v30-55" opacity="0">Each surface normal is compared with the shell's center.</text><text x="220" y="242" class="cap" data-a="" style="animation-name:v55-100" opacity="1">Every surface is extruded 0.25 units inward into a solid panel.</text></svg><div class="anim-bar"><span class="title">Animation</span><span>an open box of five surfaces</span><button class="replay" type="button">Replay</button><button class="pause" type="button">Pause</button></div></div>
+
+  <div class="callout warn"><span class="tag">Status</span>Not mentioned in the README, hardcoded thickness, and the file carries an old commented-out copy of the finger-joint code at the bottom. Treat it as a sketch that happens to work.</div>
+
+  <h2>Steps</h2>
+  <ol class="steps">
+    <li>Run the alias. <span class="prompt">select surfaces</span> Select the surfaces that make up the shell, then <kbd>Enter</kbd>.</li>
+    <li>Each surface is replaced by an extrusion 0.25 units thick, grown toward the shell's centre.</li>
+  </ol>
+
+  <h2>How it works</h2>
+  <ul>
+    <li>The centre of the shell is the average of every surface's midpoint.</li>
+    <li>For each surface, the script takes both candidate normals and keeps the one pointing toward that centre (the one whose dot product with the centre-to-surface vector is smaller).</li>
+    <li>The surface is extruded 0.25 units along that normal and the original surface deleted.</li>
+  </ul>
+
+  <h2>Tips and gotchas</h2>
+  <ul>
+    <li><strong>Thickness is hardcoded</strong> at <code>faces.py:32</code>. Change <code>0.25</code> to your sheet thickness.</li>
+    <li>Works best on convex shells (a box). For an L-shaped or very lopsided arrangement, "toward the centre" may be the wrong side for some faces.</li>
+    <li>After thickening, the panels only touch at their edges; they do not overlap. The finger-joint tools need overlap, so scale or move panels so they interpenetrate by one thickness before running <a class="cmd" href="#finger3">finger3</a>.</li>
+  </ul>
+
+  <h2>See also</h2>
+  <div class="seealso">
+    <a class="card" href="#finger3"><span class="t"><svg><use href="#i-finger3"/></svg>finger3</span><span class="d">The usual next step.</span></a>
+    <a class="card" href="#workflow"><span class="t"><svg><use href="#i-flow"/></svg>Workflow</span><span class="d">Modeling conventions the tools expect.</span></a>
+  </div>
+  <p class="src">Source: <a href="https://github.com/notkoosh/rhinotools/blob/master/faces.py" target="_blank" rel="noopener">faces.py</a>.</p>
+</article>
+
+<!-- ======================================================= GETSUBSURFACE -->
+<article class="page" id="page-getsubsurface" data-title="getsubsurface" data-crumb="Internals">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Internals</span><span>getsubsurface</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-sub"/></svg></div><div><h1>getsubsurface</h1><p class="lede">The shared helper that lets a script ask for one face of a solid.</p>
+    <div class="chips"><span class="chip"><b>module</b> getsubsurface.py</span><span class="chip"><b>function</b> GetSubSurface(prompt)</span><span class="badge internal">internal</span></div></div></div>
+
+  <div class="eli5"><span class="tag">ELI5</span>
+    <p>Rhino normally selects whole objects. This little helper says "no, I want to know which <em>side</em> of the object you clicked", and hands back both the object and a copy of that side as its own surface.</p>
+  </div>
+
+  <h2>What it returns</h2>
+  <pre><code>from getsubsurface import GetSubSurface
+polysurface_id, face_id = GetSubSurface("select down face")</code></pre>
+  <ul>
+    <li><code>polysurface_id</code>: the object you clicked on.</li>
+    <li><code>face_id</code>: a new, standalone surface object duplicated from the face you clicked. Callers use it to get a plane and a normal, then delete it.</li>
+  </ul>
+
+  <h2>Used by</h2>
+  <div class="seealso">
+    <a class="card" href="#dogbone"><span class="t"><svg><use href="#i-dogbone"/></svg>dogbone</span><span class="d">"select dogbone face"</span></a>
+    <a class="card" href="#lay"><span class="t"><svg><use href="#i-lay"/></svg>lay</span><span class="d">"select down face"</span></a>
+    <a class="card" href="#mortisetenon"><span class="t"><svg><use href="#i-mortise"/></svg>mortisetenon</span><span class="d">"select tenon surface"</span></a>
+  </div>
+
+  <h2>How it works</h2>
+  <p>It builds a RhinoCommon <code>GetObject</code> with the geometry filter set to <em>Surface</em>. With that filter Rhino lets you pick a face of a polysurface directly, and the returned object reference knows which face it was. <code>Face().DuplicateFace(True)</code> copies that face into a new Brep that is added to the document.</p>
+
+  <h2>Why Esc produces an error</h2>
+  <p>If you cancel at the prompt there is no picked object, and <code>go.Object(0)</code> raises an exception instead of returning <code>None</code>. The callers never see the <code>None</code> they test for, so the script ends with a traceback in the command history. Nothing is harmed; the work done before the cancel stays. The fix is to check <code>go.Get()</code>'s result before reading the object. <span class="fixme">FIXME</span></p>
+
+  <h2>Selecting a face in Rhino</h2>
+  <p>A plain click on the face usually works because the filter asks for surfaces. If Rhino insists on highlighting the whole solid, use sub-object selection: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+click on Windows, <kbd>⌘</kbd>+<kbd>Shift</kbd>+click on Mac. The README mentions needing a third modifier on the author's setup, so your mileage may vary.</p>
+  <p class="src">Source: <a href="https://github.com/notkoosh/rhinotools/blob/master/getsubsurface.py" target="_blank" rel="noopener">getsubsurface.py</a>.</p>
+</article>
+
+<!-- ======================================================= GLOSSARY -->
+<article class="page" id="page-glossary" data-title="Glossary" data-crumb="Start here">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Start here</span><span>Glossary</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-book"/></svg></div><div><h1>Glossary</h1><p class="lede">The Rhino and workshop words these pages lean on. Dotted-underlined terms elsewhere in the wiki link here.</p></div></div>
+  <dl class="gloss">
+    <dt>Alias</dt><dd>A short name you type at Rhino's command line that expands to a longer command macro. Set up in Options → Aliases. See <a href="#install">Install</a>.</dd>
+    <dt>Boolean union / difference / intersection</dt><dd>Solid modelling operations: union fuses solids into one, difference subtracts one from another, intersection keeps only the volume they share. The joinery tools are built out of these three.</dd>
+    <dt>Construction plane (CPlane)</dt><dd>The working plane of a viewport. Several tools set it to the face you clicked so that points and curves land on that face.</dd>
+    <dt>Dogbone</dt><dd>A round relief cut at an inside corner, placed on the corner's diagonal, so a round cutter can clear the corner. Named for the shape a slot takes with one at each end. See <a href="#dogbones">Why dogbones?</a></dd>
+    <dt>Endmill (router bit)</dt><dd>The rotating cutter in a CNC router. It has a diameter, so it can never cut a sharp inside corner.</dd>
+    <dt>Extrusion</dt><dd>A solid made by pushing a flat profile straight along a direction. Boxes and panels made with ExtrudeCrv are extrusions. The tools accept extrusions and extrusion-like polysurfaces interchangeably.</dd>
+    <dt>Finger joint (box joint)</dt><dd>A corner joint where each board has square tabs that fit into the other's gaps. See <a href="#finger-joints">Finger joints 101</a>.</dd>
+    <dt>IronPython 2.7</dt><dd>The Python implementation inside Rhino 5 to 7 (and still available in Rhino 8). These scripts use Python 2 syntax and must run on it.</dd>
+    <dt>Kerf</dt><dd>The width of material a cutter removes. A laser kerf is about 0.1 to 0.3 mm and often provides just enough slack for a tight-modelled joint. A router kerf is the bit diameter and must be handled by the toolpath software.</dd>
+    <dt>Layer</dt><dd>Rhino's way of grouping objects. The tools create <code>laydown</code> and <code>dogbone-ref</code>.</dd>
+    <dt>Mortise and tenon</dt><dd>A joint where a tab (tenon) on one part fits a matching hole (mortise) in another. See <a href="#mortisetenon">mortisetenon</a>.</dd>
+    <dt>Osnap (object snap)</dt><dd>Snapping the cursor to geometry such as endpoints. The dogbone tools need you to snap exactly to vertices. "Project osnaps" flattens snapped points onto the construction plane.</dd>
+    <dt>Polyline</dt><dd>A curve made of straight segments. Its control points are its corners, which is what the 2D dogbone tools use.</dd>
+    <dt>Polysurface (Brep)</dt><dd>A solid or shell made of several joined surfaces. Extrusions, boxes and boolean results are all polysurfaces. Selection filter 16 in rhinoscriptsyntax.</dd>
+    <dt>Sub-object selection</dt><dd>Selecting part of an object (one face, one edge) rather than the whole thing. Ctrl+Shift+click on Windows, ⌘+Shift+click on Mac.</dd>
+    <dt>Subdivisions</dt><dd>What the finger-joint tools call the number of fingers plus gaps along a joint.</dd>
+  </dl>
+</article>
+
+<!-- ======================================================= KNOWN ISSUES -->
+<article class="page" id="page-known-issues" data-title="Known issues" data-crumb="Start here">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Start here</span><span>Known issues</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-bug"/></svg></div><div><h1>Known issues</h1><p class="lede">Every FIXME and TODO from the README and the source, with what to do about it today.</p></div></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Tool</th><th>Symptom</th><th>Cause</th><th>Workaround</th></tr></thead>
+    <tbody>
+      <tr><td><a class="cmd" href="#lay">lay</a></td><td>Pressing Esc ends with a red error in the command history</td><td><a href="#getsubsurface">getsubsurface</a> reads the picked object without checking whether the pick was cancelled</td><td>Ignore it. The laid-down copies are fine.</td></tr>
+      <tr><td><a class="cmd" href="#dogbone">dogbone</a></td><td>Auto-detect relieves the wrong corners (outside instead of inside)</td><td>Corner "handedness" is judged from the border curve's direction, which depends on which side the face was picked from</td><td>Click the corners yourself, or undo and pick the opposite face.</td></tr>
+      <tr><td><a class="cmd" href="#dogbone">dogbone</a>, <a class="cmd" href="#innerhole">innerhole</a>, <a class="cmd" href="#outerhole">outerhole</a></td><td>Relief circles land on the wrong side of the corner</td><td>Same handedness problem</td><td>Run Rhino's <code>Flip</code> on the curve (2D tools) or pick the opposite face (dogbone).</td></tr>
+      <tr><td><a class="cmd" href="#dogbone">dogbone</a></td><td>Dogbones do not go all the way through a thick panel</td><td>The cutting cylinder spans a fixed ±10 units from the face</td><td>Edit <code>dogbone.py:133-136</code>; see <a href="#install">units</a>.</td></tr>
+      <tr><td><a class="cmd" href="#finger2">finger2</a>, <a class="cmd" href="#finger3">finger3</a></td><td>Fingers stop part-way across a wide joint</td><td>Slicing cylinders have a fixed 100-unit radius</td><td>Edit <code>finger.py:64</code>; see <a href="#install">units</a>.</td></tr>
+      <tr><td><a class="cmd" href="#finger2">finger2</a>, <a class="cmd" href="#finger3">finger3</a></td><td>Cannot ask for a finger width, only a count</td><td>Not implemented</td><td>Compute count = joint length ÷ desired width, round to odd.</td></tr>
+      <tr><td><a class="cmd" href="#finger2">finger2</a>, <a class="cmd" href="#finger3">finger3</a>, <a class="cmd" href="#mortisetenon">mortisetenon</a></td><td>Joints are modelled with zero clearance; no kerf setting</td><td>Not implemented</td><td>Rely on laser kerf, or offset curves before cutting.</td></tr>
+      <tr><td><a class="cmd" href="#finger2">finger2</a>, <a class="cmd" href="#finger3">finger3</a></td><td>You must draw the joint axis by hand</td><td>Not derived from the geometry yet (the README suggests a cross product of the two sets' normals)</td><td>Snap to the ends of the overlap.</td></tr>
+      <tr><td><a class="cmd" href="#faces">faces</a></td><td>Panel thickness is always 0.25</td><td>Hardcoded</td><td>Edit <code>faces.py:32</code>.</td></tr>
+      <tr><td>All</td><td>Scripts fail with a syntax error on <code>print</code></td><td>They are Python 2 scripts running on a Python 3 engine</td><td>Use the IronPython 2 engine; see <a href="#install">Install</a>.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The README also lists <em>Slotting</em> as "coming soon".</p>
+</article>
+
+<!-- ======================================================= ABOUT -->
+<article class="page" id="page-about" data-title="About this wiki" data-crumb="Start here">
+  <div class="crumbs"><span><a href="#home">Home</a></span><span>Start here</span><span>About this wiki</span></div>
+  <div class="page-head"><div class="ico"><svg><use href="#i-info"/></svg></div><div><h1>About this wiki</h1><p class="lede">One HTML file, no build step, lives in the repository under <code>docs/</code>.</p></div></div>
+  <h2>How it is built</h2>
+  <ul>
+    <li>Every page is an <code>&lt;article class="page" id="page-…"&gt;</code> in <code>docs/index.html</code>. The address bar hash picks which one is shown, so <code>#dogbone</code> is a link to the dogbone page from anywhere, including other pages' "See also" cards.</li>
+    <li>Animations are inline SVG driven by CSS keyframes on a single timeline per scene, so they loop, can be paused and replayed, and show the finished state when the viewer prefers reduced motion.</li>
+    <li>Colours come from a token block at the top of the stylesheet and follow the system light or dark theme.</li>
+    <li>Search filters the left-hand tree by title and by the hidden keywords on each entry.</li>
+  </ul>
+  <h2>Adding a page</h2>
+  <ol>
+    <li>Copy an existing <code>&lt;article&gt;</code>, give it a new <code>id="page-yourtool"</code> and <code>data-title</code>.</li>
+    <li>Add a <code>&lt;li&gt;</code> to the matching group in the <code>&lt;nav&gt;</code> with <code>href="#yourtool"</code> and some <code>data-k</code> keywords.</li>
+    <li>Link to it from related pages with <code>&lt;a class="cmd" href="#yourtool"&gt;</code> or a "See also" card.</li>
+  </ol>
+  <h2>Hosting it publicly</h2>
+  <p>Enable GitHub Pages for the repository and point it at the <code>docs/</code> folder on the default branch. The wiki will appear at <code>https://notkoosh.github.io/rhinotools/</code>. Any static host works the same way, since the page needs nothing but itself and Google Fonts.</p>
+  <h2>Sources</h2>
+  <p>Descriptions were written from the scripts themselves and the repository README, including its TODO and FIXME notes. Demonstration videos by the author are on the <a href="https://www.youtube.com/playlist?list=PL6vjZyexULrxROMOXeZTPhfKZhv0Ogfqv" target="_blank" rel="noopener">YouTube playlist</a>.</p>
+</article>
+
+<footer class="foot">Rhino Tools Wiki · documentation for <a href="https://github.com/notkoosh/rhinotools" target="_blank" rel="noopener">notkoosh/rhinotools</a> · Rhino is a trademark of Robert McNeel &amp; Associates; this is an independent project.</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var pages = Array.prototype.slice.call(document.querySelectorAll('article.page'));
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.side a'));
+  var side = document.getElementById('sidenav');
+  var menubtn = document.getElementById('menubtn');
+  var search = document.getElementById('search');
+  var nomatch = document.getElementById('nomatch');
+
+  function restart(root){
+    if (!root.getAnimations) return;
+    root.getAnimations({subtree:true}).forEach(function(a){ a.cancel(); a.play(); });
+  }
+  function show(){
+    var id = (location.hash || '#home').slice(1);
+    var page = document.getElementById('page-' + id) || document.getElementById('page-home');
+    if (!document.getElementById('page-' + id)) id = 'home';
+    pages.forEach(function(p){ p.classList.toggle('current', p === page); });
+    navLinks.forEach(function(a){
+      if (a.getAttribute('href') === '#' + id) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    });
+    var t = page.getAttribute('data-title') || 'Home';
+    document.title = (id === 'home' ? 'Rhino Tools Wiki' : t.replace(/&amp;/g,'&') + ' · Rhino Tools Wiki');
+    window.scrollTo(0, 0);
+    side.classList.remove('open'); menubtn.setAttribute('aria-expanded','false');
+    restart(page);
+  }
+  window.addEventListener('hashchange', show);
+  show();
+
+  menubtn.addEventListener('click', function(){
+    var open = side.classList.toggle('open');
+    menubtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  search.addEventListener('input', function(){
+    var q = search.value.trim().toLowerCase();
+    side.classList.toggle('filtering', q.length > 0);
+    var any = false;
+    Array.prototype.slice.call(side.querySelectorAll('li')).forEach(function(li){
+      var hay = (li.textContent + ' ' + (li.getAttribute('data-k') || '')).toLowerCase();
+      var hit = !q || hay.indexOf(q) !== -1;
+      li.classList.toggle('hide', !hit);
+      if (hit) any = true;
+    });
+    Array.prototype.slice.call(side.querySelectorAll('h4')).forEach(function(h){
+      var ul = h.nextElementSibling; var vis = ul && ul.querySelector('li:not(.hide)');
+      h.style.display = (q && !vis) ? 'none' : '';
+      if (ul) ul.style.display = (q && !vis) ? 'none' : '';
+    });
+    nomatch.classList.toggle('show', !any);
+    if (q) { side.classList.add('open'); }
+  });
+
+  Array.prototype.slice.call(document.querySelectorAll('.anim')).forEach(function(wrap){
+    var replay = wrap.querySelector('.replay'), pause = wrap.querySelector('.pause');
+    if (replay) replay.addEventListener('click', function(){ wrap.classList.remove('paused'); pause.textContent = 'Pause'; restart(wrap); });
+    if (pause) pause.addEventListener('click', function(){
+      var p = wrap.classList.toggle('paused'); pause.textContent = p ? 'Play' : 'Pause';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

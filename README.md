@@ -9,6 +9,10 @@ The explanations below will only get you so far.  See the playlist below for mor
 
 https://www.youtube.com/playlist?list=PL6vjZyexULrxROMOXeZTPhfKZhv0Ogfqv
 
+### Wiki
+
+There is a documentation wiki in [`docs/`](docs/index.html) with a page per tool: animated demonstrations, plain-language explanations, every command-line prompt, and the known issues collected in one place. Open `docs/index.html` in a browser, or enable GitHub Pages on the `docs/` folder to host it.
+
 
 
 ### How to use these tools
